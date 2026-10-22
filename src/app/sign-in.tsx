@@ -62,7 +62,10 @@ export default function SignInScreen() {
 
       {/* Next button */}
       <View className="items-center px-6" style={{ paddingBottom: insets.bottom + 24 }}>
-        <Pressable className="w-full max-w-[280px] bg-[#4CAA45] py-4 rounded-2xl items-center">
+        <Pressable 
+            onPress={() => router.push("/home")} 
+            className="w-full max-w-[280px] bg-[#4CAA45] py-4 rounded-2xl items-center"
+        >
           <Text className="text-white text-xl font-semibold">Next</Text>
         </Pressable>
       </View>
