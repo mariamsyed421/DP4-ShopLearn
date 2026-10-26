@@ -27,7 +27,7 @@ export default function CreateAccountScreen() {
 
         <View className="flex-1 px-6 pt-8">
           <View className="items-center mb-7">
-            <View className="flex-row items-center justify-center">
+            <View className="flex-row items-center">
               <Text className="text-2xl font-bold text-center">
                 Let’s set up{"\n"}your account!
               </Text>
@@ -92,7 +92,10 @@ export default function CreateAccountScreen() {
           </View>
 
           <View className="flex-1 justify-end pb-8">
-            <Pressable className="bg-[#6AAA50] py-4 rounded-2xl items-center">
+            <Pressable
+              onPress={() => router.push("/account-setup")}
+              className="bg-[#6AAA50] py-4 rounded-2xl items-center"
+            >
               <Text className="text-white text-xl font-bold">Next</Text>
             </Pressable>
           </View>

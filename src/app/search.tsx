@@ -1,5 +1,6 @@
 import { router } from "expo-router";
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import { Image, Pressable, Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -21,6 +22,19 @@ export default function SearchScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const [status, setStatus] = useState<Status>("idle");
+  const [textSize, setTextSize] = useState("medium");
+
+  useEffect(() => {
+    loadTextSize();
+  }, []);
+
+  async function loadTextSize() {
+    const saved = await AsyncStorage.getItem("preferences");
+    if (saved) {
+      const data = JSON.parse(saved);
+      setTextSize(data.textSize || "medium");
+    }
+  }
 
   const bubbleWidth = width + 40;
   const bubbleHeight = bubbleWidth * (963 / 1398);
@@ -41,7 +55,8 @@ export default function SearchScreen() {
           resizeMode="stretch"
         />
         <Text
-          className="text-[26px] font-semibold text-center px-10"
+          className="font-semibold text-center px-10"
+          style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 30 : 26 }}
           style={{ marginBottom: tailHeight + 30 }}
         >
           {bubbleText[status]}
@@ -73,7 +88,7 @@ export default function SearchScreen() {
               </Pressable>
             ))}
           </View>
-          <Text className="text-[26px] font-semibold">Select an item</Text>
+          <Text className="font-semibold" style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 30 : 26 }}>Select an item</Text>
         </View>
       ) : (
         /* Mic button */
@@ -93,7 +108,7 @@ export default function SearchScreen() {
               resizeMode="contain"
             />
           </Pressable>
-          <Text className="text-[26px] font-semibold mt-6">
+          <Text className="font-semibold mt-6" style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 30 : 26 }}>
             {status === "listening" ? "Tap when done" : "Tap to speak"}
           </Text>
         </View>

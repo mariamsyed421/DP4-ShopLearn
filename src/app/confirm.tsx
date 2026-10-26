@@ -11,10 +11,23 @@ export default function ConfirmScreen() {
   const { width } = useWindowDimensions();
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [payment, setPayment] = useState<Payment>(defaultPayment);
+  const [textSize, setTextSize] = useState("medium");
 
   const bubbleWidth = width + 40;
   const bubbleHeight = bubbleWidth * (963 / 1398);
   const tailHeight = bubbleHeight * 0.2;
+
+  useEffect(() => {
+    loadTextSize();
+  }, []);
+
+  async function loadTextSize() {
+    const saved = await AsyncStorage.getItem("preferences");
+    if (saved) {
+      const data = JSON.parse(saved);
+      setTextSize(data.textSize || "medium");
+    }
+  }
 
   // Load cart and payment info
   useEffect(() => {
@@ -49,7 +62,8 @@ export default function ConfirmScreen() {
           resizeMode="stretch"
         />
         {items.length > 0 && (
-          <Text className="text-[28px] text-center px-10" style={{ marginBottom: tailHeight + 30 }}>
+          <Text className="text-center px-10"
+          style={{ fontSize: textSize === "small" ? 24 : textSize === "large" ? 32 : 28, marginBottom: tailHeight + 30 }} >
             You are ordering{" "}
             {items.length === 1 ? (
               <>
@@ -75,10 +89,10 @@ export default function ConfirmScreen() {
 
       {/* Order info and buttons */}
       <View className="flex-1 bg-[#99CBF7] px-8 pt-6" style={{ paddingBottom: insets.bottom + 16 }}>
-        <Text className="text-[20px]">
+        <Text className="" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>
           <Text className="font-bold">Card</Text>: Ending in {lastFour}
         </Text>
-        <Text className="text-[20px] mt-5">
+        <Text className="mt-5" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>
           <Text className="font-bold">Delivery address:</Text> {payment.address}
         </Text>
 
@@ -87,13 +101,13 @@ export default function ConfirmScreen() {
             onPress={handlePlaceOrder}
             className="w-full max-w-[290px] bg-[#4CAA45] py-3 rounded-2xl items-center"
           >
-            <Text className="text-white text-[22px] font-semibold">Yes, place order</Text>
+            <Text className="text-white font-semibold" style={{ fontSize: textSize === "small" ? 19 : textSize === "large" ? 26 : 22 }}>Yes, place order</Text>
           </Pressable>
           <Pressable
             onPress={() => router.back()}
             className="w-full max-w-[290px] bg-white border-2 border-[#4CAA45] py-3 rounded-2xl items-center"
           >
-            <Text className="text-[#4CAA45] text-[22px] font-semibold">No, go back</Text>
+            <Text className="text-[#4CAA45] font-semibold" style={{ fontSize: textSize === "small" ? 19 : textSize === "large" ? 26 : 22 }}>No, go back</Text>
           </Pressable>
         </View>
       </View>

@@ -1,5 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import { Image, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { products } from "../data/products";
 
@@ -8,6 +10,19 @@ export default function OrderPlacedScreen() {
   const { width } = useWindowDimensions();
   const { id } = useLocalSearchParams<{ id: string }>();
   const product = products.find((p) => p.id === id);
+  const [textSize, setTextSize] = useState("medium");
+
+  useEffect(() => {
+    loadTextSize();
+  }, []);
+
+  async function loadTextSize() {
+    const saved = await AsyncStorage.getItem("preferences");
+    if (saved) {
+      const data = JSON.parse(saved);
+      setTextSize(data.textSize || "medium");
+    }
+  }
 
   const bubbleWidth = width + 40;
   const bubbleHeight = bubbleWidth * (963 / 1398);
@@ -23,8 +38,9 @@ export default function OrderPlacedScreen() {
           resizeMode="stretch"
         />
         <Text
-          className="text-[28px] font-semibold text-center px-10"
-          style={{ marginBottom: tailHeight + 30 }}
+          className="font-semibold text-center px-10"
+          style={{ fontSize: textSize === "small" ? 24 : textSize === "large" ? 32 : 28, marginBottom: tailHeight + 30 }}
+          
         >
           Your usual cereal is on its way!
         </Text>
@@ -59,7 +75,7 @@ export default function OrderPlacedScreen() {
           onPress={() => router.dismissTo("/home")}
           className="w-full max-w-[290px] self-center bg-[#4CAA45] py-3 rounded-2xl items-center"
         >
-          <Text className="text-white text-[22px] font-semibold">Back to Home</Text>
+          <Text className="text-white font-semibold" style={{ fontSize: textSize === "small" ? 19 : textSize === "large" ? 26 : 22 }}>Back to Home</Text>
         </Pressable>
       </View>
     </View>

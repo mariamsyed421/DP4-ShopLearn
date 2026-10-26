@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -12,6 +13,19 @@ const tips = [
 export default function HelpScreen() {
   const insets = useSafeAreaInsets();
   const [isListening, setIsListening] = useState(false);
+  const [textSize, setTextSize] = useState("medium");
+
+  useEffect(() => {
+    loadTextSize();
+  }, []);
+
+  async function loadTextSize() {
+    const saved = await AsyncStorage.getItem("preferences");
+    if (saved) {
+      const data = JSON.parse(saved);
+      setTextSize(data.textSize || "medium");
+    }
+  }
 
   return (
     <View className="flex-1 bg-white">
@@ -21,14 +35,14 @@ export default function HelpScreen() {
           <Pressable onPress={() => router.back()} className="absolute left-4" hitSlop={10}>
             <Ionicons name="arrow-back-circle-outline" size={48} color="black" />
           </Pressable>
-          <Text className="text-[32px] font-bold">Help</Text>
+          <Text className="font-bold" style={{ fontSize: textSize === "small" ? 27 : textSize === "large" ? 36 : 32 }}>Help</Text>
         </View>
       </View>
 
       <View className="flex-1 px-8 pt-6">
         {/* Saved tips */}
-        <Text className="text-[26px] font-bold">Saved tips</Text>
-        <Text className="text-[18px] mt-1 mb-4">Tap to play</Text>
+        <Text className="font-bold" style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 30 : 26 }}>Saved tips</Text>
+        <Text className="mt-1 mb-4" style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 21 : 18 }}>Tap to play</Text>
 
         {tips.map((tip) => (
           <Pressable
@@ -36,7 +50,7 @@ export default function HelpScreen() {
             onPress={() => {}}
             className="flex-row items-center justify-between bg-[#B5DAFC] rounded-xl px-9 py-5 mb-5"
           >
-            <Text className="text-[18px] font-semibold text-[#333]">{tip.label}</Text>
+            <Text className="font-semibold text-[#333]" style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 21 : 18 }}>{tip.label}</Text>
             <Ionicons name="chevron-forward" size={24} color="black" />
           </Pressable>
         ))}
@@ -66,7 +80,7 @@ export default function HelpScreen() {
             resizeMode="contain"
           />
         </Pressable>
-        <Text className="text-[22px] font-semibold mt-4">
+        <Text className="font-semibold mt-4" style={{ fontSize: textSize === "small" ? 19 : textSize === "large" ? 26 : 22 }}>
           {isListening ? "Tap when done" : "Tap to speak"}
         </Text>
       </View>
