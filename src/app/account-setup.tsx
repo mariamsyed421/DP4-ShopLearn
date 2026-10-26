@@ -1,68 +1,216 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { Image, Pressable, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AccountSetupScreen() {
+  const [textSize, setTextSize] = useState("medium");
+
+  useEffect(() => {
+    loadTextSize();
+  }, []);
+
+  async function loadTextSize() {
+    const saved = await AsyncStorage.getItem("preferences");
+    if (saved) {
+      const data = JSON.parse(saved);
+      setTextSize(data.textSize || "medium");
+    }
+  }
+
+  const headingSize = textSize === "small" ? 18 : textSize === "large" ? 23 : 20;
+  const buttonSize = textSize === "small" ? 19 : textSize === "large" ? 24 : 21;
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <View className="flex-1">
-        <View className="bg-[#A9C7F2] px-5 py-5 flex-row items-center">
+      <View style={{ flex: 1 }}>
+        <View
+          style={{
+            backgroundColor: "#A9C7F2",
+            paddingHorizontal: 18,
+            paddingVertical: 12,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
           <Pressable
-            onPress={() => router.back()}
-            className="w-12 h-12 rounded-full border-2 border-black items-center justify-center"
+            onPress={() => router.replace("/create-account")}
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 30,
+              borderWidth: 2,
+              borderColor: "black",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <Text className="text-3xl">←</Text>
+            <Text style={{ fontSize: 30 }}>←</Text>
           </Pressable>
 
-          <Text className="text-3xl font-bold ml-3">Account set up</Text>
+          <Text
+            style={{
+              fontSize: textSize === "small" ? 25 : textSize === "large" ? 32 : 28,
+              fontWeight: "bold",
+              marginLeft: 10,
+            }}
+          >
+            Account set up
+          </Text>
         </View>
 
-        <View className="flex-1 px-6 pt-8">
-          <View className="items-center">
-            <View className="flex-row items-center">
-              <Text className="text-2xl font-bold text-center">
-                Set up what you{"\n"}like, or skip and use{"\n"}the default
-                settings
-              </Text>
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: 25,
+            paddingTop: 25,
+            paddingBottom: 25,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: headingSize,
+                fontWeight: "bold",
+                textAlign: "center",
+                flexShrink: 1,
+              }}
+            >
+              Set up what you{"\n"}
+              like, or skip and use{"\n"}
+              the default settings
+            </Text>
 
-              <Image
-                source={require("../../assets/images/mascot.png")}
-                className="w-[105px] h-[105px] ml-2"
-                resizeMode="contain"
-              />
-            </View>
+            <Image
+              source={require("../../assets/images/mascot.png")}
+              style={{
+                width: 90,
+                height: 90,
+                marginLeft: 8,
+              }}
+              resizeMode="contain"
+            />
           </View>
 
-          <View className="mt-12 gap-4">
-            <Pressable className="bg-[#B9D3F7] py-5 rounded-2xl items-center">
-              <Text className="text-2xl font-bold text-gray-700">
+          <View style={{ marginTop: 30 }}>
+            <Pressable
+              style={{
+                backgroundColor: "#B9D3F7",
+                width: "100%",
+                paddingVertical: 16,
+                borderRadius: 15,
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: buttonSize,
+                  fontWeight: "bold",
+                  color: "#4B4B4B",
+                }}
+              >
                 Usual items
               </Text>
             </Pressable>
 
-            <Pressable className="bg-[#B9D3F7] py-5 rounded-2xl items-center">
-              <Text className="text-2xl font-bold text-gray-700">
+            <Pressable
+              onPress={() => router.push("/preferences")}
+              style={{
+                backgroundColor: "#B9D3F7",
+                width: "100%",
+                paddingVertical: 16,
+                borderRadius: 15,
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: buttonSize,
+                  fontWeight: "bold",
+                  color: "#4B4B4B",
+                }}
+              >
                 Preferences
               </Text>
             </Pressable>
 
-            <Pressable className="bg-[#B9D3F7] py-5 rounded-2xl items-center">
-              <Text className="text-2xl font-bold text-gray-700">Tips</Text>
-            </Pressable>
-          </View>
-
-          <View className="flex-1 justify-end pb-8 gap-3">
-            <Pressable className="bg-[#6AAA50] py-4 rounded-2xl items-center">
-              <Text className="text-white text-xl font-bold">Done</Text>
-            </Pressable>
-
-            <Pressable className="border-2 border-[#6AAA50] py-3 rounded-2xl items-center">
-              <Text className="text-[#5C9F4B] text-lg font-bold text-center">
-                Skip and use default{"\n"}settings
+            <Pressable
+              style={{
+                backgroundColor: "#B9D3F7",
+                width: "100%",
+                paddingVertical: 16,
+                borderRadius: 15,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: buttonSize,
+                  fontWeight: "bold",
+                  color: "#4B4B4B",
+                }}
+              >
+                Tips
               </Text>
             </Pressable>
           </View>
-        </View>
+
+          <View style={{ marginTop: 25 }}>
+            <Pressable
+              onPress={() => router.push("/setup-complete")}
+              style={{
+                backgroundColor: "#6AAA50",
+                width: "100%",
+                paddingVertical: 15,
+                borderRadius: 15,
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: textSize === "small" ? 18 : textSize === "large" ? 23 : 20,
+                  fontWeight: "bold",
+                }}
+              >
+                Done
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => router.push("/setup-complete")}
+              style={{
+                borderWidth: 2,
+                borderColor: "#6AAA50",
+                width: "100%",
+                paddingVertical: 12,
+                borderRadius: 15,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#5C9F4B",
+                  fontSize: textSize === "small" ? 15 : textSize === "large" ? 19 : 17,
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
+                Skip and use default{"\n"}
+                settings
+              </Text>
+            </Pressable>
+          </View>
+        </ScrollView>
       </View>
     </SafeAreaView>
   );

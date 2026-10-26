@@ -9,6 +9,19 @@ import { products } from "../data/products";
 export default function CartScreen() {
   const insets = useSafeAreaInsets();
   const [cartIds, setCartIds] = useState<string[]>([]);
+  const [textSize, setTextSize] = useState("medium");
+
+  useEffect(() => {
+    loadTextSize();
+  }, []);
+
+  async function loadTextSize() {
+    const saved = await AsyncStorage.getItem("preferences");
+    if (saved) {
+      const data = JSON.parse(saved);
+      setTextSize(data.textSize || "medium");
+    }
+  }
 
   // Load the saved cart 
   useEffect(() => {
@@ -38,13 +51,13 @@ export default function CartScreen() {
           <Pressable onPress={() => router.back()} className="absolute left-4" hitSlop={10}>
             <Ionicons name="arrow-back-circle-outline" size={48} color="black" />
           </Pressable>
-          <Text className="text-[32px] font-bold">Your Cart</Text>
+          <Text className="font-bold" style={{ fontSize: textSize === "small" ? 27 : textSize === "large" ? 36 : 32 }}>Your Cart</Text>
         </View>
       </View>
 
       <ScrollView className="flex-1" contentContainerClassName="px-5 pt-12 pb-6">
         {items.length === 0 ? (
-          <Text className="text-[20px] text-center">Your cart is empty</Text>
+          <Text className="text-center" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>Your cart is empty</Text>
         ) : (
           <>
             {/* Cart items */}
@@ -54,8 +67,8 @@ export default function CartScreen() {
                   <Image source={item.image} className="w-[70px] h-[80px]" resizeMode="contain" />
                 </View>
                 <View className="flex-1 ml-4 justify-between">
-                  <Text className="text-[20px] font-semibold">{item.cartName}</Text>
-                  <Text className="text-[22px] font-bold text-[#333] self-end">
+                  <Text className="font-semibold" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>{item.cartName}</Text>
+                  <Text className="font-bold text-[#333] self-end" style={{ fontSize: textSize === "small" ? 19 : textSize === "large" ? 26 : 22 }}>
                     ${item.price.toFixed(2)}
                   </Text>
                 </View>
@@ -63,12 +76,12 @@ export default function CartScreen() {
             ))}
 
             {/* Total and checkout */}
-            <Text className="text-[30px] font-bold self-end mt-4">total: ${total.toFixed(2)}</Text>
+            <Text className="font-bold self-end mt-4" style={{ fontSize: textSize === "small" ? 26 : textSize === "large" ? 35 : 30 }}>total: ${total.toFixed(2)}</Text>
             <Pressable
               onPress={handleCheckout}
               className="bg-[#4CAA45] px-6 py-2 rounded-full self-end mt-6"
             >
-              <Text className="text-white text-[24px] font-semibold">Checkout</Text>
+              <Text className="text-white font-semibold" style={{ fontSize: textSize === "small" ? 20 : textSize === "large" ? 28 : 24 }}>Checkout</Text>
             </Pressable>
           </>
         )}
@@ -86,7 +99,7 @@ export default function CartScreen() {
             className="w-[80px] h-[95px]"
             resizeMode="contain"
           />
-          <Text className="text-[18px] font-semibold">Tap for help</Text>
+          <Text className="font-semibold" style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 21 : 18 }}>Tap for help</Text>
         </View>
       </Pressable>
     </View>
