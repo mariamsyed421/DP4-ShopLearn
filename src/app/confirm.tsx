@@ -1,14 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { defaultPayment, Payment } from "../data/payment";
 import { products } from "../data/products";
 
 export default function ConfirmScreen() {
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
+  const smallPhone = height < 750;
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [payment, setPayment] = useState<Payment>(defaultPayment);
   const [textSize, setTextSize] = useState("medium");
@@ -40,22 +41,26 @@ export default function ConfirmScreen() {
     load();
   }, []);
 
-  const items = cartIds
-    .map((id) => products.find((p) => p.id === id))
-    .filter((p) => p !== undefined);
-  const total = items.reduce((sum, item) => sum + item.price, 0);
+  const items = products
+    .map((product) => ({
+      product: product,
+      quantity: cartIds.filter((id) => id === product.id).length,
+    }))
+    .filter((item) => item.quantity > 0);
+  const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const others = items.length - 1;
   const lastFour = payment.cardNumber.replace(/\s/g, "").slice(-4);
 
   async function handlePlaceOrder() {
+    if (items.length === 0) return;
     await AsyncStorage.removeItem("cart");
-    router.replace(`/order-placed?id=${items[0].id}`);
+    router.replace(`/order-placed?id=${items[0].product.id}`);
    }
 
   return (
-    <View className="flex-1 bg-white overflow-hidden">
+    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }}>
       {/* Speech bubble with order summary */}
-      <View className="justify-end" style={{ height: insets.top + 220 }}>
+      <View className="justify-end overflow-hidden" style={{ minHeight: insets.top + (smallPhone ? 240 : 250) }}>
         <Image
           source={require("../../assets/images/bubble.png")}
           style={{ position: "absolute", bottom: 0, left: -20, width: bubbleWidth, height: bubbleHeight }}
@@ -67,11 +72,15 @@ export default function ConfirmScreen() {
             You are ordering{" "}
             {items.length === 1 ? (
               <>
-                1 Family Size box of <Text className="font-bold">{items[0].name}</Text>
+                {items[0].quantity} Family Size {items[0].quantity === 1 ? "box" : "boxes"} of{" "}
+                <Text className="font-bold">{items[0].product.name}</Text>
               </>
             ) : (
               <>
-                <Text className="font-bold">{items[0].name}</Text> and {others} other{" "}
+                <Text className="font-bold">
+                  {items[0].product.name} x {items[0].quantity}
+                </Text>{" "}
+                and {others} other{" "}
                 {others === 1 ? "item" : "items"}
               </>
             )}{" "}
@@ -83,12 +92,13 @@ export default function ConfirmScreen() {
       {/* Mascot */}
       <Image
         source={require("../../assets/images/mascot.png")}
-        className="w-[220px] h-[240px] self-center"
+        className="self-center" style={smallPhone ? { width: 130, height: 150 } : { width: 220, height: 240 }}
         resizeMode="contain"
       />
 
       {/* Order info and buttons */}
-      <View className="flex-1 bg-[#99CBF7] px-8 pt-6" style={{ paddingBottom: insets.bottom + 16 }}>
+      <View className="bg-[#99CBF7] px-8 pt-6" style={{ flexGrow: 1, justifyContent: "space-between", paddingBottom: insets.bottom + 16 }}>
+       <View>
         <Text className="" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>
           <Text className="font-bold">Card</Text>: Ending in {lastFour}
         </Text>
@@ -96,7 +106,8 @@ export default function ConfirmScreen() {
           <Text className="font-bold">Delivery address:</Text> {payment.address}
         </Text>
 
-        <View className="flex-1 items-center justify-end gap-4">
+       </View>
+        <View className="items-center gap-4 mt-6">
           <Pressable
             onPress={handlePlaceOrder}
             className="w-full max-w-[290px] bg-[#4CAA45] py-3 rounded-2xl items-center"
@@ -111,6 +122,6 @@ export default function ConfirmScreen() {
           </Pressable>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }

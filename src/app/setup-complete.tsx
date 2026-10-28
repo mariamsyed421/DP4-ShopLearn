@@ -6,18 +6,36 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SetupCompleteScreen() {
   const [textSize, setTextSize] = useState("medium");
+  const [prefsDone, setPrefsDone] = useState(false);
+  const [usualDone, setUsualDone] = useState(false);
+  const [tipsDone, setTipsDone] = useState(false);
 
   useEffect(() => {
-    loadTextSize();
+    loadSettings();
   }, []);
 
-  async function loadTextSize() {
-    const saved = await AsyncStorage.getItem("preferences");
-    if (saved) {
-      const data = JSON.parse(saved);
+  async function loadSettings() {
+    const savedPrefs = await AsyncStorage.getItem("preferences");
+    const savedUsual = await AsyncStorage.getItem("usualItems");
+    const savedTips = await AsyncStorage.getItem("customTips");
+
+    if (savedPrefs) {
+      const data = JSON.parse(savedPrefs);
       setTextSize(data.textSize || "medium");
     }
+
+    setPrefsDone(savedPrefs !== null);
+    setUsualDone(savedUsual !== null);
+    setTipsDone(savedTips !== null && JSON.parse(savedTips).length > 0);
   }
+
+  function goHome() {
+    router.dismissAll();
+    router.replace("/home");
+  }
+
+  const titleSize = textSize === "small" ? 24 : textSize === "large" ? 32 : 28;
+  const lineSize = textSize === "small" ? 17 : textSize === "large" ? 23 : 20;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -33,23 +51,11 @@ export default function SetupCompleteScreen() {
               paddingTop: 30,
             }}
           >
-            <Text
-              style={{
-                fontSize: textSize === "small" ? 24 : textSize === "large" ? 32 : 28,
-                fontWeight: "bold",
-                textAlign: "center",
-              }}
-            >
+            <Text style={{ fontSize: titleSize, fontWeight: "bold", textAlign: "center" }}>
               Set up is complete!
             </Text>
 
-            <Text
-              style={{
-                fontSize: textSize === "small" ? 24 : textSize === "large" ? 32 : 28,
-                fontWeight: "bold",
-                textAlign: "center",
-              }}
-            >
+            <Text style={{ fontSize: titleSize, fontWeight: "bold", textAlign: "center" }}>
               all set
             </Text>
           </View>
@@ -80,43 +86,20 @@ export default function SetupCompleteScreen() {
               minHeight: 300,
             }}
           >
-            <Text
-              style={{
-                fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20,
-                fontWeight: "600",
-                marginBottom: 14,
-              }}
-            >
+            <Text style={{ fontSize: lineSize, fontWeight: "600", marginBottom: 14 }}>
               ✓ Account created
             </Text>
 
-            <Text
-              style={{
-                fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20,
-                fontWeight: "600",
-                marginBottom: 14,
-              }}
-            >
-              ✓ Preferences set
+            <Text style={{ fontSize: lineSize, fontWeight: "600", marginBottom: 14 }}>
+              {prefsDone ? "✓ Preferences set" : "• Preferences: using default settings"}
             </Text>
 
-            <Text
-              style={{
-                fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20,
-                fontWeight: "600",
-                marginBottom: 14,
-              }}
-            >
-              ✓ Preferred items set
+            <Text style={{ fontSize: lineSize, fontWeight: "600", marginBottom: 14 }}>
+              {usualDone ? "✓ Usual items set" : "• Usual items: using all items"}
             </Text>
 
-            <Text
-              style={{
-                fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20,
-                fontWeight: "600",
-              }}
-            >
-              ✓ Tips set
+            <Text style={{ fontSize: lineSize, fontWeight: "600" }}>
+              {tipsDone ? "✓ Tips set" : "• Tips: using default tips"}
             </Text>
 
             <View
@@ -126,7 +109,7 @@ export default function SetupCompleteScreen() {
               }}
             >
               <Pressable
-                onPress={() => router.push("/home")}
+                onPress={goHome}
                 style={{
                   backgroundColor: "#6AAA50",
                   paddingVertical: 15,
@@ -134,13 +117,7 @@ export default function SetupCompleteScreen() {
                   alignItems: "center",
                 }}
               >
-                <Text
-                  style={{
-                    color: "#fff",
-                    fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20,
-                    fontWeight: "bold",
-                  }}
-                >
+                <Text style={{ color: "#fff", fontSize: lineSize, fontWeight: "bold" }}>
                   Back to Home
                 </Text>
               </Pressable>

@@ -1,17 +1,19 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AccountSetupScreen() {
   const [textSize, setTextSize] = useState("medium");
 
-  useEffect(() => {
-    loadTextSize();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadSettings();
+    }, [])
+  );
 
-  async function loadTextSize() {
+  async function loadSettings() {
     const saved = await AsyncStorage.getItem("preferences");
     if (saved) {
       const data = JSON.parse(saved);
@@ -35,7 +37,7 @@ export default function AccountSetupScreen() {
           }}
         >
           <Pressable
-            onPress={() => router.replace("/create-account")}
+            onPress={() => router.back()}
             style={{
               width: 48,
               height: 48,
@@ -100,6 +102,7 @@ export default function AccountSetupScreen() {
 
           <View style={{ marginTop: 30 }}>
             <Pressable
+              onPress={() => router.push("/usual-items")}
               style={{
                 backgroundColor: "#B9D3F7",
                 width: "100%",
@@ -143,6 +146,7 @@ export default function AccountSetupScreen() {
             </Pressable>
 
             <Pressable
+              onPress={() => router.push("/tips")}
               style={{
                 backgroundColor: "#B9D3F7",
                 width: "100%",
@@ -178,7 +182,7 @@ export default function AccountSetupScreen() {
               <Text
                 style={{
                   color: "white",
-                  fontSize: textSize === "small" ? 18 : textSize === "large" ? 23 : 20,
+                  fontSize: headingSize,
                   fontWeight: "bold",
                 }}
               >
