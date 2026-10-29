@@ -1,6 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Image, Pressable, Text, TextInput, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CreateAccountScreen() {
@@ -10,6 +11,31 @@ export default function CreateAccountScreen() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [error, setError] = useState("");
+
+  async function handleNext() {
+    if (username.trim() === "") {
+      setError("Please type a username.");
+      return;
+    }
+
+    if (password.length < 4) {
+      setError("Your password needs at least 4 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("The two passwords do not match. Please try again.");
+      return;
+    }
+
+    const account = { username: username.trim(), password: password };
+    await AsyncStorage.setItem("account", JSON.stringify(account));
+
+    setError("");
+    router.push("/account-setup");
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -25,7 +51,11 @@ export default function CreateAccountScreen() {
           <Text className="text-3xl font-bold ml-3">Create Account</Text>
         </View>
 
-        <View className="flex-1 px-6 pt-8">
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="px-6 pt-8 pb-8"
+          keyboardShouldPersistTaps="handled"
+        >
           <View className="items-center mb-7">
             <View className="flex-row items-center">
               <Text className="text-2xl font-bold text-center">
@@ -34,7 +64,7 @@ export default function CreateAccountScreen() {
 
               <Image
                 source={require("../../assets/images/mascot.png")}
-                className="w-[105px] h-[105px] ml-3"
+                className="ml-3" style={{ width: 105, height: 105 }}
                 resizeMode="contain"
               />
             </View>
@@ -46,6 +76,8 @@ export default function CreateAccountScreen() {
             value={username}
             onChangeText={setUsername}
             placeholder="Enter username"
+            autoCapitalize="none"
+            autoCorrect={false}
             className="border-2 border-[#7194E8] rounded-2xl px-4 py-3 text-lg mb-5 bg-[#F5F7FC]"
           />
 
@@ -91,15 +123,19 @@ export default function CreateAccountScreen() {
             </Pressable>
           </View>
 
-          <View className="flex-1 justify-end pb-8">
-            <Pressable
-              onPress={() => router.push("/account-setup")}
-              className="bg-[#6AAA50] py-4 rounded-2xl items-center"
-            >
-              <Text className="text-white text-xl font-bold">Next</Text>
-            </Pressable>
-          </View>
-        </View>
+          {error !== "" && (
+            <Text className="text-[#C0392B] text-lg font-semibold text-center mt-4">
+              {error}
+            </Text>
+          )}
+
+          <Pressable
+            onPress={handleNext}
+            className="bg-[#6AAA50] py-4 rounded-2xl items-center mt-6"
+          >
+            <Text className="text-white text-xl font-bold">Next</Text>
+          </Pressable>
+        </ScrollView>
       </View>
     </SafeAreaView>
   );

@@ -19,9 +19,9 @@ export default function PreferencesScreen() {
     if (saved) {
       const data = JSON.parse(saved);
 
-      setTextSize(data.textSize);
-      setSpokenReadback(data.spokenReadback);
-      setVoiceSpeed(data.voiceSpeed);
+      setTextSize(data.textSize || "medium");
+      setSpokenReadback(data.spokenReadback !== false);
+      setVoiceSpeed(data.voiceSpeed || "normal");
     }
   }
 
@@ -34,7 +34,7 @@ export default function PreferencesScreen() {
 
     await AsyncStorage.setItem("preferences", JSON.stringify(settings));
 
-    router.replace("/account-setup");
+    router.back();
   }
 
   let headingSize = 23;

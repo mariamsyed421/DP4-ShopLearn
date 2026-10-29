@@ -15,7 +15,7 @@ export default function WelcomeScreen() {
 
         <Image
           source={require("../../assets/images/mascot.png")}
-          className="w-[200px] h-[230px]"
+          style={{ width: 200, height: 230 }}
           resizeMode="contain"
         />
 
