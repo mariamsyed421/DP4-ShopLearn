@@ -69,11 +69,17 @@ export default function HomeScreen() {
           >
             What would you like to shop for today?
           </Text>
-          <Image
-            source={require("../../assets/images/mascot.png")}
-            style={{ width: 90, height: 110 }}
-            resizeMode="contain"
-          />
+          <Pressable
+            onPress={() => router.push({ pathname: "/help", params: { from: "home" } })}
+            className="items-center"
+          >
+            <Image
+              source={require("../../assets/images/mascot.png")}
+              style={{ width: 90, height: 110 }}
+              resizeMode="contain"
+            />
+            <Text className="font-semibold" style={{ fontSize: textSize === "small" ? 14 : textSize === "large" ? 19 : 16 }}>Tap for help</Text>
+          </Pressable>
         </View>
 
         {/* Usual items */}

@@ -68,7 +68,7 @@ export default function ProductScreen() {
         className="flex-row items-center justify-between px-5"
         style={{ paddingBottom: insets.bottom + 16 }}
       >
-        <Pressable onPress={() => router.push("/help")} className="items-center">
+        <Pressable onPress={() => router.push({ pathname: "/help", params: { from: "product" } })} className="items-center">
           <Image
             source={require("../../../assets/images/mascot.png")}
             style={{ width: 80, height: 95 }}

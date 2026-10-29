@@ -15,6 +15,18 @@ export type SavedTip = {
 
 export const allTips: Tip[] = [
   {
+    id: "reorder",
+    label: "Ordering a usual item",
+    steps:
+      "1. On the Home screen, tap a picture under Your usual items.\n2. Tap Add to cart.\n3. In your cart, tap Checkout.",
+  },
+  {
+    id: "addcart",
+    label: "Adding an item to your cart",
+    steps:
+      "1. Look at the picture and the details to make sure it is the right item.\n2. Tap Add to cart.\n3. Your cart opens. Tap + or - to change how many you want.",
+  },
+  {
     id: "checkout",
     label: "Checking out",
     steps:

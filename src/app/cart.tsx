@@ -123,7 +123,7 @@ export default function CartScreen() {
 
       {/*  mascot */}
       <Pressable
-        onPress={() => router.push("/help")}
+        onPress={() => router.push({ pathname: "/help", params: { from: "cart" } })}
         className="items-start px-5"
         style={{ paddingBottom: insets.bottom + 16 }}
       >
