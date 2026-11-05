@@ -115,7 +115,7 @@ export default function ConfirmScreen() {
             <Text className="text-white font-semibold" style={{ fontSize: textSize === "small" ? 19 : textSize === "large" ? 26 : 22 }}>Yes, place order</Text>
           </Pressable>
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/payment"))}
             className="w-full max-w-[290px] bg-white border-2 border-[#4CAA45] py-3 rounded-2xl items-center"
           >
             <Text className="text-[#4CAA45] font-semibold" style={{ fontSize: textSize === "small" ? 19 : textSize === "large" ? 26 : 22 }}>No, go back</Text>

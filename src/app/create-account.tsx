@@ -42,7 +42,7 @@ export default function CreateAccountScreen() {
       <View className="flex-1">
         <View className="bg-[#A9C7F2] px-5 py-5 flex-row items-center">
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
             className="w-12 h-12 rounded-full border-2 border-black items-center justify-center"
           >
             <Text className="text-3xl">←</Text>
