@@ -34,7 +34,7 @@ export default function PreferencesScreen() {
 
     await AsyncStorage.setItem("preferences", JSON.stringify(settings));
 
-    router.back();
+    (router.canGoBack() ? router.back() : router.replace("/account-setup"));
   }
 
   let headingSize = 23;
@@ -63,7 +63,7 @@ export default function PreferencesScreen() {
           }}
         >
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/account-setup"))}
             style={{
               width: 48,
               height: 48,

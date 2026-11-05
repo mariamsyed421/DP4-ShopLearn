@@ -44,7 +44,7 @@ export default function ProductScreen() {
       {/* Blue header */}
       <View className="bg-[#99CBF7]" style={{ paddingTop: insets.top }}>
         <View className="h-20 items-center justify-center">
-        <Pressable onPress={() => router.back()} className="absolute left-4" hitSlop={10}>
+        <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))} className="absolute left-4" hitSlop={10}>
             <Ionicons name="arrow-back-circle-outline" size={48} color="black" />
         </Pressable>
         <Text className="font-bold" style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 28 : 26, marginLeft: 40 }}>Product Details</Text>
@@ -56,7 +56,7 @@ export default function ProductScreen() {
 
         {/* Product image */}
         <View className="h-[225px] border-[1.5px] border-[#99CBF7] rounded-2xl items-center justify-center mt-6">
-          <Image source={product.image} style={{ width: 150, height: 190 }} resizeMode="contain" />
+          <Image source={product.image} style={{ width: 230, height: 190 }} resizeMode="contain" />
         </View>
 
         <Text className="font-medium mt-8" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>{product.description}</Text>

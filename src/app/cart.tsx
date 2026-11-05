@@ -62,7 +62,7 @@ export default function CartScreen() {
       {/* Blue header */}
       <View className="bg-[#99CBF7]" style={{ paddingTop: insets.top }}>
         <View className="h-20 items-center justify-center">
-          <Pressable onPress={() => router.back()} className="absolute left-4" hitSlop={10}>
+          <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))} className="absolute left-4" hitSlop={10}>
             <Ionicons name="arrow-back-circle-outline" size={48} color="black" />
           </Pressable>
           <Text className="font-bold" style={{ fontSize: textSize === "small" ? 27 : textSize === "large" ? 36 : 32 }}>Your Cart</Text>

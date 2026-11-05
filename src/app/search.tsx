@@ -7,18 +7,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const choices = [
-  { id: "cheerios", name: "Cheerios", image: require("../../assets/images/cheerios.png") },
-  { id: "ctc", name: "Cinnamon Toast Crunch", image: require("../../assets/images/cinnamon-toast-crunch.png") },
-  { id: "chex", name: "Rice Chex", image: require("../../assets/images/rice-chex.png") },
-];
+import { products } from "../data/products";
 
 type Status = "idle" | "listening" | "results";
 
@@ -65,10 +61,15 @@ export default function SearchScreen() {
     setStatus("results");
   }
 
-  const matches = choices.filter((c) =>
-    c.name.toLowerCase().includes(query.trim().toLowerCase())
+  const typedWord = query.trim().toLowerCase();
+  const matches = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(typedWord) ||
+      p.category.toLowerCase().includes(typedWord) ||
+      p.title.toLowerCase().includes(typedWord)
   );
-  const shownChoices = matches.length > 0 ? matches : choices;
+  let shownChoices = products.slice(0, 3);
+  if (typedWord !== "" && matches.length > 0) shownChoices = matches.slice(0, 6);
 
   let bubbleMessage = bubbleText[status];
   if (typing && status === "idle") bubbleMessage = "Type what you are looking for";
@@ -81,7 +82,7 @@ export default function SearchScreen() {
       {/* Speech bubble with text inside */}
       <View className="justify-end" style={{ minHeight: insets.top + 240 }}>
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
           hitSlop={10}
           className="absolute left-4"
           style={{ top: insets.top + 8, zIndex: 10 }}
@@ -114,18 +115,23 @@ export default function SearchScreen() {
           className="flex-1 bg-[#99CBF7] items-center justify-between pt-8 px-6"
           style={{ paddingBottom: insets.bottom + 16 }}
         >
-          {/* cereal choices */}
-          <View className={shownChoices.length === 3 ? "flex-row justify-between w-full" : "flex-row justify-center gap-4 w-full"}>
-            {shownChoices.map((item) => (
-              <Pressable
-                key={item.id}
-                onPress={() => router.push(`/product/${item.id}`)}
-                className="bg-white rounded-xl p-2"
-              >
-                <Image source={item.image} style={{ width: 86, height: 136 }} resizeMode="contain" />
-              </Pressable>
-            ))}
-          </View>
+          {/* product choices */}
+          <ScrollView style={{ flexGrow: 0, maxHeight: height * 0.4 }} contentContainerStyle={{ alignItems: "center" }}>
+            <View className="flex-row flex-wrap justify-center w-full" style={{ gap: 12 }}>
+              {shownChoices.map((item) => (
+                <Pressable
+                  key={item.id}
+                  onPress={() => router.push(`/product/${item.id}`)}
+                  accessibilityLabel={`Choose ${item.name}`}
+                  className="bg-white rounded-xl p-2 items-center"
+                  style={{ width: 104 }}
+                >
+                  <Image source={item.image} style={{ width: 86, height: 120 }} resizeMode="contain" />
+                  <Text className="font-semibold text-center mt-1" style={{ fontSize: 13 }}>{item.name}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </ScrollView>
           <Text className="font-semibold" style={{ fontSize: bigText }}>Select an item</Text>
         </View>
       ) : typing ? (
