@@ -37,7 +37,7 @@ export default function AccountSetupScreen() {
           }}
         >
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
             style={{
               width: 48,
               height: 48,

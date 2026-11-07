@@ -10,7 +10,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   const [textSize, setTextSize] = useState("medium");
-  const [usualIds, setUsualIds] = useState<string[]>(products.map((p) => p.id));
+  const [usualIds, setUsualIds] = useState<string[]>(["cheerios", "ctc", "chex"]);
 
   useFocusEffect(
     useCallback(() => {

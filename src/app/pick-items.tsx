@@ -63,7 +63,7 @@ export default function PickItemsScreen() {
           }}
         >
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/usual-items"))}
             style={{
               width: 48,
               height: 48,
@@ -157,7 +157,7 @@ export default function PickItemsScreen() {
           ))}
 
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/usual-items"))}
             style={{
               backgroundColor: "#6AAA50",
               paddingVertical: 15,

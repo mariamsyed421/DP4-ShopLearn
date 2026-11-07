@@ -51,7 +51,7 @@ export default function SignInScreen() {
       <View className="bg-[#99CBF7]" style={{ paddingTop: insets.top }}>
         <View className="h-20 items-center justify-center">
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
             className="absolute left-4"
             hitSlop={10}
           >

@@ -77,7 +77,7 @@ export default function RecordTipScreen() {
     }
 
     if (tipId) {
-      router.back();
+      (router.canGoBack() ? router.back() : router.replace("/edit-tips"));
     } else {
       router.replace("/edit-tips");
     }
@@ -86,7 +86,7 @@ export default function RecordTipScreen() {
   async function handleDelete() {
     const tips = await loadTips();
     await saveTips(tips.filter((t) => t.id !== tipId));
-    router.back();
+    (router.canGoBack() ? router.back() : router.replace("/edit-tips"));
   }
 
   const titleSize = textSize === "small" ? 25 : textSize === "large" ? 32 : 28;
@@ -111,7 +111,7 @@ export default function RecordTipScreen() {
           }}
         >
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/edit-tips"))}
             style={{
               width: 48,
               height: 48,
