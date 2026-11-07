@@ -17,7 +17,9 @@ export default function PickItemsScreen() {
   const [textSize, setTextSize] = useState("medium");
   const [picked, setPicked] = useState<string[]>([]);
 
-  const categoryProducts = category === "grocery" ? products : [];
+  const categoryProducts = products.filter(
+    (product) => product.category === category
+  );
 
   useEffect(() => {
     loadSettings();
