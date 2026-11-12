@@ -1,4 +1,3 @@
-import { sendRecording } from "@/api/speech_text";
 import { Ionicons } from "@expo/vector-icons";
 //import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -50,7 +49,7 @@ export default function SearchScreen() {
     await recorder.prepareToRecordAsync();
     recorder.record();
   }
-  const getRec = sendRecording(recorder.uri!)
+  //const getRec = sendRecording(recorder.uri!)
   const [typing, setTyping] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -174,6 +173,9 @@ export default function SearchScreen() {
             </View>
           </ScrollView>
           <Text className="font-semibold" style={{ fontSize: bigText }}>Select an item</Text>
+          {/*<Pressable onPress={() => createAudioPlayer(recorder.uri!).play()}>
+            <Text>Play</Text>
+          </Pressable>*/}
         </View>
       ) : typing ? (
         /* Typing option */
@@ -233,6 +235,8 @@ export default function SearchScreen() {
               </Text>
             </Pressable>
           )}
+       
+
         </View>
       )}
     </KeyboardAvoidingView>

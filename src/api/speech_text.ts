@@ -1,10 +1,10 @@
-import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
-import dotenv from "dotenv";
-import process from "node:process";
+//import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
+//import dotenv from "dotenv";
+//import process from "node:process";
 
-dotenv.config({ path: ".env.local" });
+//dotenv.config({ path: ".env.local" });
 
-export async function sendRecording(recording:string) {
+/*export async function sendRecording(recording:string) {
   const client = new ElevenLabsClient({
     apiKey: process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY,
   });
@@ -16,5 +16,5 @@ export async function sendRecording(recording:string) {
   });
   console.log(response);
   return response.text;
-}
+}*/
 
