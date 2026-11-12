@@ -5,6 +5,7 @@ import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, 
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 //import { Alert, Button, Image, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { sendRecording } from "@/api/speech_text";
 import {
   Alert,
   Image,
@@ -86,6 +87,8 @@ export default function SearchScreen() {
     else if (status === "listening")
     {
       recorder.stop(); 
+      const transcribeTxt = await sendRecording(recorder.uri!);
+      setQuery(transcribeTxt);
       setStatus("results");
     } 
   }
