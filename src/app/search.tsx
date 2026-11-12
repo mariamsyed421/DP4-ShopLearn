@@ -1,7 +1,9 @@
-import { router } from "expo-router";
+import { sendRecording } from "@/api/speech_text";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioPlayer, useAudioRecorder } from 'expo-audio';
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { Alert, Button, Image, Pressable, Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const choices = [
@@ -23,7 +25,22 @@ export default function SearchScreen() {
   const { width } = useWindowDimensions();
   const [status, setStatus] = useState<Status>("idle");
   const [textSize, setTextSize] = useState("medium");
-
+  const perms = async () => {
+    const permRes = await requestRecordingPermissionsAsync();
+    if(!permRes.granted)
+      Alert.alert('Denied')
+    return permRes.granted
+  }
+  const recorder = useAudioRecorder(
+    RecordingPresets.HIGH_QUALITY,
+    (status) => console.log('Recording status: ', status)
+  )
+  const player = useAudioPlayer(recorder.uri);
+  const startRec = async () => {
+    await recorder.prepareToRecordAsync();
+    recorder.record();
+  }
+  const getRec = sendRecording(recorder.uri)
   useEffect(() => {
     loadTextSize();
   }, []);
@@ -40,11 +57,26 @@ export default function SearchScreen() {
   const bubbleHeight = bubbleWidth * (963 / 1398);
   const tailHeight = bubbleHeight * 0.2;
 
-  function handleMicPress() {
-    if (status === "idle") setStatus("listening");
-    else if (status === "listening") setStatus("results");
+  async function handleMicPress() {
+    await setAudioModeAsync ({
+      allowsRecording: true,
+      playsInSilentMode: true
+    });
+    if (status === "idle") 
+      {
+        const result = await perms()
+        
+        if(result) {
+          startRec();
+          setStatus("listening");
+        }
+      }
+    else if (status === "listening")
+    {
+      recorder.stop(); 
+      setStatus("results");
+    } 
   }
-
   return (
     <View className="flex-1 bg-white overflow-hidden">
       {/* Speech bubble with text inside */}
@@ -56,8 +88,8 @@ export default function SearchScreen() {
         />
         <Text
           className="font-semibold text-center px-10"
-          style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 30 : 26 }}
-          style={{ marginBottom: tailHeight + 30 }}
+          style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 30 : 26, marginBottom: tailHeight + 30}}
+          //style={{ marginBottom: tailHeight + 30 }}
         >
           {bubbleText[status]}
         </Text>
@@ -89,6 +121,7 @@ export default function SearchScreen() {
             ))}
           </View>
           <Text className="font-semibold" style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 30 : 26 }}>Select an item</Text>
+          <Button onPress={()=> player.play()} title = "Play"/>
         </View>
       ) : (
         /* Mic button */
