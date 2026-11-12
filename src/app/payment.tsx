@@ -50,10 +50,10 @@ export default function PaymentScreen() {
       {/* Blue header */}
       <View className="bg-[#99CBF7]" style={{ paddingTop: insets.top }}>
         <View className="h-20 items-center justify-center">
-          <Pressable onPress={() => router.back()} className="absolute left-4" hitSlop={10}>
+          <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace("/cart"))} className="absolute left-4" hitSlop={10}>
             <Ionicons name="arrow-back-circle-outline" size={48} color="black" />
           </Pressable>
-          <Text className="font-bold" style={{ fontSize: textSize === "small" ? 26 : textSize === "large" ? 34 : 30 }}>Payment details</Text>
+          <Text className="font-bold" style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 28 : 26, marginLeft: 40 }}>Payment details</Text>
         </View>
       </View>
 
@@ -131,10 +131,10 @@ export default function PaymentScreen() {
         className="flex-row items-center justify-between px-5"
         style={{ paddingBottom: insets.bottom + 16 }}
       >
-        <Pressable onPress={() => router.push("/help")} className="items-center">
+        <Pressable onPress={() => router.push({ pathname: "/help", params: { from: "payment" } })} className="items-center">
           <Image
             source={require("../../assets/images/mascot.png")}
-            className="w-[80px] h-[95px]"
+            style={{ width: 80, height: 95 }}
             resizeMode="contain"
           />
           <Text className="font-semibold" style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 21 : 18 }}>Tap for help</Text>

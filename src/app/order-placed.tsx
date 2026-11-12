@@ -1,13 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
-import { Image, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { products } from "../data/products";
 
 export default function OrderPlacedScreen() {
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
+  const smallPhone = height < 750;
   const { id } = useLocalSearchParams<{ id: string }>();
   const product = products.find((p) => p.id === id);
   const [textSize, setTextSize] = useState("medium");
@@ -29,9 +30,9 @@ export default function OrderPlacedScreen() {
   const tailHeight = bubbleHeight * 0.2;
 
   return (
-    <View className="flex-1 bg-white overflow-hidden">
+    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }}>
       {/* Speech bubble */}
-      <View className="justify-end" style={{ height: insets.top + 200 }}>
+      <View className="justify-end overflow-hidden" style={{ minHeight: insets.top + 200 }}>
         <Image
           source={require("../../assets/images/bubble.png")}
           style={{ position: "absolute", bottom: 0, left: -20, width: bubbleWidth, height: bubbleHeight }}
@@ -42,31 +43,31 @@ export default function OrderPlacedScreen() {
           style={{ fontSize: textSize === "small" ? 24 : textSize === "large" ? 32 : 28, marginBottom: tailHeight + 30 }}
           
         >
-          Your usual cereal is on its way!
+          Your {product ? product.name : "order"} is on its way!
         </Text>
       </View>
 
       {/* Mascot */}
       <Image
         source={require("../../assets/images/mascot.png")}
-        className="w-[220px] h-[240px] self-center"
+        className="self-center" style={smallPhone ? { width: 150, height: 170 } : { width: 220, height: 240 }}
         resizeMode="contain"
       />
 
       {/* Blue panel */}
       <View
-        className="flex-1 bg-[#99CBF7] px-8 pt-8 justify-between"
-        style={{ paddingBottom: insets.bottom + 24 }}
+        className="bg-[#99CBF7] px-8 pt-8 justify-between"
+        style={{ flexGrow: 1, paddingBottom: insets.bottom + 24 }}
       >
         <View className="flex-row items-center justify-between">
           {product && (
             <View className="bg-white rounded-xl p-2">
-              <Image source={product.image} className="w-[120px] h-[180px]" resizeMode="contain" />
+              <Image source={product.image} style={smallPhone ? { width: 90, height: 130 } : { width: 120, height: 180 }} resizeMode="contain" />
             </View>
           )}
           <Image
             source={require("../../assets/images/delivery.png")}
-            className="w-[140px] h-[170px]"
+            style={smallPhone ? { width: 110, height: 140 } : { width: 140, height: 170 }}
             resizeMode="contain"
           />
         </View>
@@ -78,6 +79,6 @@ export default function OrderPlacedScreen() {
           <Text className="text-white font-semibold" style={{ fontSize: textSize === "small" ? 19 : textSize === "large" ? 26 : 22 }}>Back to Home</Text>
         </Pressable>
       </View>
-    </View>
+    </ScrollView>
   );
 }

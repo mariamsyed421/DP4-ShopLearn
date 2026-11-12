@@ -6,6 +6,7 @@ export type Product = {
   description: string;
   servings: string;
   price: number; //keep this as like 3.4 so we can total up the cart price 
+  category: string; //grocery, household, health or other
   image: any;
 };
 
@@ -18,6 +19,7 @@ export const products: Product[] = [
     description: "Cheerios, Heart Healthy Gluten Free Breakfast Cereal, Family Size, 18 oz\n100% Whole Grain Oats",
     servings: "13.0 servings per container | 1½ cup (39g) (age 4+ years)",
     price: 3.4,
+    category: "grocery",
     image: require("../../assets/images/cheerios.png"),
   },
   {
@@ -28,6 +30,7 @@ export const products: Product[] = [
     description: "Cinnamon Toast Crunch, Heart Healthy Gluten Free Breakfast Cereal, Family Size, 18 oz\n100% Whole Grain Oats",
     servings: "13.0 servings per container | 1½ cup (39g) (age 4+ years)",
     price: 3.98,
+    category: "grocery",
     image: require("../../assets/images/cinnamon-toast-crunch.png"),
   },
   {
@@ -38,6 +41,7 @@ export const products: Product[] = [
     description: "Rice Chex, Heart Healthy Gluten Free Breakfast Cereal, Family Size, 18 oz\n100% Whole Grain Oats",
     servings: "13.0 servings per container | 1½ cup (39g) (age 4+ years)",
     price: 3.68,
+    category: "grocery",
     image: require("../../assets/images/rice-chex.png"),
   },
 ];
