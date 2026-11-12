@@ -4,17 +4,23 @@
 
 //dotenv.config({ path: ".env.local" });
 
-/*export async function sendRecording(recording:string) {
-  const client = new ElevenLabsClient({
-    apiKey: process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY,
+export const sendRecording = async (uri:string) => {
+  const formD = new FormData();
+  formD.append("file", {
+    uri: uri,
+    name: "recording.m4a",
+    type: "audio/m4a",
+  } as any);
+  formD.append("model_id", "scribe_v3");
+
+  const response = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
+    method: "POST",
+    headers: {"xi-api-key": process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY || ""},
+    body: formD,
   });
-  const rec = await fetch(recording);
-  const audBlob = new Blob([await rec.arrayBuffer()],  {type: "audio/m4a"});
-  const response = await client.speechToText.convert({   
-        file: audBlob,
-        modelId: "scribe_v2" 
-  });
-  console.log(response);
-  return response.text;
-}*/
+  const data = await response.json();
+  return data.text
+  
+
+}
 
