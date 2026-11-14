@@ -22,7 +22,7 @@ export default function SearchScreen() {
   const [typing, setTyping] = useState(false);
   const [query, setQuery] = useState("");
 
-  // show searching for 1.5 seconds, then the results
+  // show searching for 1.5 seconds
   function showResults() {
     setStatus("searching");
     setTimeout(() => setStatus("results"), 1500);

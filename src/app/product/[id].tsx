@@ -64,7 +64,7 @@ export default function ProductScreen() {
             <Text className="text-[18px] font-bold text-[#173F27]">Back</Text>
           </Pressable>
 
-          {/* Cart, same as home */}
+          {/* Cart*/}
           <Pressable
             onPress={() => router.push("/cart")}
             className="flex-row items-center h-[44px] px-4 rounded-full gap-2 bg-[#DCEFD8]"

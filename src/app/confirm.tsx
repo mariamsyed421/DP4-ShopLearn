@@ -87,7 +87,7 @@ export default function ConfirmScreen() {
               )}
             </View>
 
-            {/* fits 2.5 items so you can tell it scrolls */}
+            {/* fits 2 items */}
             <ScrollView style={{ height: 140 }} nestedScrollEnabled>
             {items.map((item) => (
               <View key={item.product.id} className="flex-row items-center py-2">
