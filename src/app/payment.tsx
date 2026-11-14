@@ -6,12 +6,18 @@ import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-nativ
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { defaultPayment, Payment } from "../data/payment";
 
-const inputClass =
-  "h-[56px] bg-white border-2 border-[#97CB91] rounded-full px-5 text-[18px] text-[#173F27]";
+// light green when locked
+function inputClass(editing: boolean) {
+  return editing
+    ? "h-[56px] bg-white border-2 border-[#97CB91] rounded-full px-5 text-[18px] text-[#173F27]"
+    : "h-[56px] bg-[#EEF3ED] border-2 border-[#EEF3ED] rounded-full px-5 text-[18px] text-[#173F27]";
+}
 
 export default function PaymentScreen() {
   const insets = useSafeAreaInsets();
   const [payment, setPayment] = useState<Payment>(defaultPayment);
+  const [editingCard, setEditingCard] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(false);
 
   // Load saved payment info
   useEffect(() => {
@@ -54,12 +60,19 @@ export default function PaymentScreen() {
         {/* Card holder */}
         <View className="flex-row items-center justify-between mb-2">
           <Text className="text-[20px] font-bold text-[#173F27]">Card Holder Name</Text>
-          <MaterialIcons name="edit" size={26} color="#173F27" />
+          <Pressable
+            onPress={() => setEditingCard(!editingCard)}
+            className="flex-row items-center h-[40px] px-4 rounded-full gap-1 bg-[#DCEFD8]"
+          >
+            <MaterialIcons name={editingCard ? "check" : "edit"} size={20} color="#173F27" />
+            <Text className="text-[16px] font-bold text-[#173F27]">{editingCard ? "Done" : "Edit"}</Text>
+          </Pressable>
         </View>
         <TextInput
           value={payment.name}
           onChangeText={(text) => update("name", text)}
-          className={inputClass}
+          editable={editingCard}
+          className={inputClass(editingCard)}
         />
 
         {/* Card number */}
@@ -68,17 +81,19 @@ export default function PaymentScreen() {
           value={payment.cardNumber}
           onChangeText={(text) => update("cardNumber", text)}
           keyboardType="number-pad"
-          className={inputClass}
+          editable={editingCard}
+          className={inputClass(editingCard)}
         />
 
-        {/* Exp date and CVV side by side */}
+        {/* Exp date and CVV */}
         <View className="flex-row gap-5 mt-5">
           <View className="flex-1">
             <Text className="text-[20px] font-bold text-[#173F27] mb-2">Exp. Date</Text>
             <TextInput
               value={payment.expDate}
               onChangeText={(text) => update("expDate", text)}
-              className={inputClass}
+              editable={editingCard}
+              className={inputClass(editingCard)}
             />
           </View>
           <View className="flex-1">
@@ -88,7 +103,8 @@ export default function PaymentScreen() {
               onChangeText={(text) => update("cvv", text)}
               keyboardType="number-pad"
               secureTextEntry
-              className={inputClass}
+              editable={editingCard}
+              className={inputClass(editingCard)}
             />
           </View>
         </View>
@@ -96,12 +112,19 @@ export default function PaymentScreen() {
         {/* Delivery address */}
         <View className="flex-row items-center justify-between mt-12 mb-2">
           <Text className="text-[20px] font-bold text-[#173F27]">Delivery Address</Text>
-          <MaterialIcons name="edit" size={26} color="#173F27" />
+          <Pressable
+            onPress={() => setEditingAddress(!editingAddress)}
+            className="flex-row items-center h-[40px] px-4 rounded-full gap-1 bg-[#DCEFD8]"
+          >
+            <MaterialIcons name={editingAddress ? "check" : "edit"} size={20} color="#173F27" />
+            <Text className="text-[16px] font-bold text-[#173F27]">{editingAddress ? "Done" : "Edit"}</Text>
+          </Pressable>
         </View>
         <TextInput
           value={payment.address}
           onChangeText={(text) => update("address", text)}
-          className={inputClass}
+          editable={editingAddress}
+          className={inputClass(editingAddress)}
         />
       </ScrollView>
 

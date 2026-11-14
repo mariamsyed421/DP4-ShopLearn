@@ -8,7 +8,7 @@ import { products } from "../data/products";
 
 export default function CartScreen() {
   const insets = useSafeAreaInsets();
-  // Cart is a list of ids
+  // Cart ids
   const [cartIds, setCartIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function CartScreen() {
     saveCart(cartIds.filter((_, index) => index !== position));
   }
 
-  // Remove button: remove every copy of the id
+  // Remove button
   function removeAll(id: string) {
     saveCart(cartIds.filter((cartId) => cartId !== id));
   }
@@ -55,7 +55,7 @@ export default function CartScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      {/* Headerft */}
+      {/* Header */}
       <View
         className="items-center justify-center"
         style={{ paddingTop: insets.top + 16, height: insets.top + 16 + 44 }}
@@ -90,8 +90,9 @@ export default function CartScreen() {
         <ScrollView className="flex-1" contentContainerClassName="px-6 pt-8 pb-6">
           {/* Cart items */}
           {items.map((item) => (
-            <View
+            <Pressable
               key={item.product.id}
+              onPress={() => router.push(`/product/${item.product.id}`)}
               className="flex-row bg-[#DCEFD8] border-2 border-[#8BC585] rounded-2xl p-3 mb-4"
             >
               {/* Product picture */}
@@ -130,7 +131,7 @@ export default function CartScreen() {
                   </Pressable>
                 </View>
               </View>
-            </View>
+            </Pressable>
           ))}
 
           {/* Total and checkout */}
@@ -142,6 +143,12 @@ export default function CartScreen() {
             className="w-full h-[60px] rounded-2xl items-center justify-center bg-[#2F7A3A] mt-6"
           >
             <Text className="text-[22px] font-bold text-white">Checkout</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => router.replace("/home")}
+            className="w-full h-[60px] rounded-2xl items-center justify-center bg-white border-2 border-[#2F7A3A] mt-4"
+          >
+            <Text className="text-[22px] font-bold text-[#2F7A3A]">Continue Shopping</Text>
           </Pressable>
         </ScrollView>
       )}

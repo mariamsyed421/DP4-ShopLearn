@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { products } from "../data/products";
 
@@ -48,6 +48,14 @@ export default function HomeScreen() {
     setTimeout(() => setToast(""), 2000);
   }
 
+  // ask before signing out
+  function handleSignOut() {
+    Alert.alert("Sign out?", "Are you sure you want to sign out?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Sign out", style: "destructive", onPress: () => router.replace("/") },
+    ]);
+  }
+
   const usualProducts = products.filter((p) => usualIds.includes(p.id));
 
   return (
@@ -64,6 +72,14 @@ export default function HomeScreen() {
           {/* Header */}
           <View className="h-[44px] items-center justify-center">
             <Text className="text-[32px] font-bold text-[#173F27]">Home</Text>
+            {/* Past orders */}
+            <Pressable
+              onPress={() => router.push("/past-orders")}
+              className="absolute left-6 flex-row items-center h-[44px] px-4 rounded-full gap-2 bg-[#DCEFD8]"
+            >
+              <Ionicons name="receipt-outline" size={22} color="#173F27" />
+              <Text className="text-[18px] font-bold text-[#173F27]">Orders</Text>
+            </Pressable>
             <Pressable
               onPress={() => router.push("/cart")}
               className="absolute right-6 flex-row items-center h-[44px] px-4 rounded-full gap-2 bg-[#DCEFD8]"
@@ -173,7 +189,7 @@ export default function HomeScreen() {
             <Text className="text-[20px] font-bold text-[#2F7A3A]">Account settings</Text>
           </Pressable>
 
-          <Pressable onPress={() => router.replace("/")} hitSlop={8}>
+          <Pressable onPress={handleSignOut} hitSlop={8}>
             <Text className="text-[18px] font-bold underline text-[#2F7A3A]">Sign out</Text>
           </Pressable>
         </View>
