@@ -1,8 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+//import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioPlayer, useAudioRecorder } from 'expo-audio';
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
+//import { Alert, Button, Image, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { sendRecording } from "@/api/speech_text";
 import {
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -30,6 +35,22 @@ export default function SearchScreen() {
   const smallPhone = height < 750;
   const [status, setStatus] = useState<Status>("idle");
   const [textSize, setTextSize] = useState("medium");
+  const perms = async () => {
+    const permRes = await requestRecordingPermissionsAsync();
+    if(!permRes.granted)
+      Alert.alert('Denied')
+    return permRes.granted
+  }
+  const recorder = useAudioRecorder(
+    RecordingPresets.HIGH_QUALITY,
+    (status) => console.log('Recording status: ', status)
+  )
+  const player = useAudioPlayer(recorder.uri);
+  const startRec = async () => {
+    await recorder.prepareToRecordAsync();
+    recorder.record();
+  }
+  //const getRec = sendRecording(recorder.uri!)
   const [typing, setTyping] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -49,12 +70,34 @@ export default function SearchScreen() {
   const bubbleHeight = bubbleWidth * (963 / 1398);
   const tailHeight = bubbleHeight * 0.2;
 
+  async function handleMicPress() {
+    await setAudioModeAsync ({
+      allowsRecording: true,
+      playsInSilentMode: true
+    });
+    if (status === "idle") 
+      {
+        const result = await perms();
+        
+        if(result) {
+          startRec();
+          setStatus("listening");
+        }
+      }
+    else if (status === "listening")
+    {
+      await recorder.stop(); 
+      const transcribeTxt = await sendRecording(recorder.uri!);
+      setQuery(transcribeTxt);
+      setStatus("results");
+    } 
+  }
   const bigText = textSize === "small" ? 22 : textSize === "large" ? 30 : 26;
 
-  function handleMicPress() {
+  /*function handleMicPress() {
     if (status === "idle") setStatus("listening");
     else if (status === "listening") setStatus("results");
-  }
+  }*/
 
   function handleTypedSearch() {
     if (query.trim() === "") return;
@@ -74,13 +117,16 @@ export default function SearchScreen() {
   let bubbleMessage = bubbleText[status];
   if (typing && status === "idle") bubbleMessage = "Type what you are looking for";
 
+  if (status == "results" && query.trim() != "")
+    bubbleMessage = `Here is what you are looking for: ${query}`;
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       className="flex-1 bg-white overflow-hidden"
     >
       {/* Speech bubble with text inside */}
-      <View className="justify-end" style={{ minHeight: insets.top + 240 }}>
+      <View className="justify-end" style={{ minHeight: insets.top + (smallPhone ? 200 : 240) }}>
         <Pressable
           onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
           hitSlop={10}
@@ -102,21 +148,23 @@ export default function SearchScreen() {
         </Text>
       </View>
 
-      <Image
-        source={require("../../assets/images/mascot.png")}
-        className="self-center"
-        style={typing && status === "idle" ? { width: 120, height: 140 } : smallPhone ? { width: 140, height: 165 } : { width: 200, height: 235 }}
-        resizeMode="contain"
-      />
+      {/* The mascot shrinks to fit so it never sits under the mic button */}
+      <View className="flex-1 items-center justify-center" style={{ minHeight: 90 }}>
+        <Image
+          source={require("../../assets/images/mascot.png")}
+          style={{ width: "100%", height: "100%", maxWidth: 220, maxHeight: 250 }}
+          resizeMode="contain"
+        />
+      </View>
 
       {status === "results" ? (
         /* Results panel */
         <View
-          className="flex-1 bg-[#99CBF7] items-center justify-between pt-8 px-6"
+          className="bg-[#99CBF7] items-center pt-6 px-6"
           style={{ paddingBottom: insets.bottom + 16 }}
         >
           {/* product choices */}
-          <ScrollView style={{ flexGrow: 0, maxHeight: height * 0.4 }} contentContainerStyle={{ alignItems: "center" }}>
+          <ScrollView style={{ flexGrow: 0, maxHeight: height * 0.33 }} contentContainerStyle={{ alignItems: "center" }}>
             <View className="flex-row flex-wrap justify-center w-full" style={{ gap: 12 }}>
               {shownChoices.map((item) => (
                 <Pressable
@@ -133,10 +181,13 @@ export default function SearchScreen() {
             </View>
           </ScrollView>
           <Text className="font-semibold" style={{ fontSize: bigText }}>Select an item</Text>
+          {/*<Pressable onPress={() => createAudioPlayer(recorder.uri!).play()}>
+            <Text>Play</Text>
+          </Pressable>*/}
         </View>
       ) : typing ? (
         /* Typing option */
-        <View className="flex-1 items-center px-6 pt-4" style={{ paddingBottom: insets.bottom + 16 }}>
+        <View className="items-center px-6 pt-4" style={{ paddingBottom: insets.bottom + 16 }}>
           <TextInput
             value={query}
             onChangeText={setQuery}
@@ -165,7 +216,7 @@ export default function SearchScreen() {
         </View>
       ) : (
         /* Mic button */
-        <View className="flex-1 items-center justify-end" style={{ paddingBottom: insets.bottom + 16 }}>
+        <View className="items-center justify-end" style={{ paddingBottom: insets.bottom + 16 }}>
           <Pressable
             onPress={handleMicPress}
             className="w-[120px] h-[120px] rounded-full bg-[#F2F2F2] border-2 border-[#BABABA] items-center justify-center"
@@ -192,6 +243,8 @@ export default function SearchScreen() {
               </Text>
             </Pressable>
           )}
+       
+
         </View>
       )}
     </KeyboardAvoidingView>

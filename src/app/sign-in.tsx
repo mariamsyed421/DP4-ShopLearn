@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, Text, TextInput, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SignInScreen() {
@@ -66,9 +66,13 @@ export default function SignInScreen() {
         </View>
       </View>
 
-      <View className="flex-1 px-5">
+      <ScrollView
+        className="flex-1 px-5"
+        contentContainerStyle={{ paddingBottom: 24 }}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Greeting row */}
-        <View className="flex-row items-center justify-between mt-8 mb-12 pl-4 pr-2">
+        <View className="flex-row items-center justify-between mt-4 mb-6 pl-4 pr-2">
           <View className="flex-row items-center">
             <Text
               className="font-semibold ml-3"
@@ -94,7 +98,7 @@ export default function SignInScreen() {
           autoCapitalize="none"
           autoCorrect={false}
           textAlignVertical="center"
-          className="h-12 bg-[#F1F5FB] border-[1.5px] border-[#5B8FD9] rounded-2xl px-4 py-0 mb-8"
+          className="h-12 bg-[#F1F5FB] border-[1.5px] border-[#5B8FD9] rounded-2xl px-4 py-0 mb-6"
           style={{ fontSize: inputSize }}
         />
 
@@ -112,11 +116,11 @@ export default function SignInScreen() {
         />
 
         {error !== "" && (
-          <Text className="text-[#C0392B] font-semibold text-center mt-6" style={{ fontSize: labelSize - 2 }}>
+          <Text className="text-[#C0392B] font-semibold text-center mt-5" style={{ fontSize: labelSize - 2 }}>
             {error}
           </Text>
         )}
-      </View>
+      </ScrollView>
 
       {/* Next button */}
       <View className="items-center px-6" style={{ paddingBottom: insets.bottom + 24 }}>

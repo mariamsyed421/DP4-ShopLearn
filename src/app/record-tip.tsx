@@ -1,8 +1,9 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioPlayer, useAudioRecorder } from 'expo-audio';
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { loadTips, saveTips } from "../data/tips";
 
@@ -15,6 +16,29 @@ export default function RecordTipScreen() {
   const [name, setName] = useState("");
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
+
+  const perms = async () => {
+    const permRes = await requestRecordingPermissionsAsync();
+    if(!permRes.granted)
+      Alert.alert('Denied')
+    return permRes.granted
+  }
+  const recorder = useAudioRecorder(
+    RecordingPresets.HIGH_QUALITY,
+    (status) => console.log('Recording status: ', status)
+  )
+  const player = useAudioPlayer("file:///var/mobile/Containers/Data/Application/4CF30DC3-6A4D-459A-89E4-25D46D88EA98/Library/Caches/ExpoAudio/recording-C4A18D57-77FF-4175-AACB-5F90E674E2D0.m4a");
+  function playBack() {
+    if(player.playing)
+      player.pause();
+    else{
+      player.play();
+    }
+  }
+  const startRec = async () => {
+    await recorder.prepareToRecordAsync();
+    recorder.record();
+  }
 
   useEffect(() => {
     loadSettings();
@@ -37,11 +61,20 @@ export default function RecordTipScreen() {
     }
   }
 
-  function handleMicPress() {
-    if (status === "recording") {
-      setStatus("done");
+  async function handleMicPress() {
+    await setAudioModeAsync ({
+          allowsRecording: true,
+          playsInSilentMode: true
+    });
+    if (status != "recording") {
+      const result = await perms();
+      if (result) {
+        await startRec();
+        setStatus("recording");
+      }
     } else {
-      setStatus("recording");
+      await recorder.stop();
+      setStatus("done");
     }
     setError("");
   }
@@ -211,7 +244,7 @@ export default function RecordTipScreen() {
                 {error}
               </Text>
             )}
-
+            <Pressable onPress={() => player.play()}><Text>Play</Text></Pressable>
             <Pressable
               onPress={handleSave}
               style={{
@@ -222,6 +255,7 @@ export default function RecordTipScreen() {
                 marginBottom: 12,
               }}
             >
+              
               <Text style={{ color: "#fff", fontSize: labelSize, fontWeight: "bold" }}>
                 Save tip
               </Text>
