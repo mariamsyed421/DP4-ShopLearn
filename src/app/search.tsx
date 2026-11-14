@@ -77,7 +77,7 @@ export default function SearchScreen() {
     });
     if (status === "idle") 
       {
-        const result = await perms()
+        const result = await perms();
         
         if(result) {
           startRec();
