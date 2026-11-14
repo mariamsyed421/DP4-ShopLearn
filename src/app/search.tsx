@@ -86,7 +86,7 @@ export default function SearchScreen() {
       }
     else if (status === "listening")
     {
-      recorder.stop(); 
+      await recorder.stop(); 
       const transcribeTxt = await sendRecording(recorder.uri!);
       setQuery(transcribeTxt);
       setStatus("results");
@@ -116,6 +116,9 @@ export default function SearchScreen() {
 
   let bubbleMessage = bubbleText[status];
   if (typing && status === "idle") bubbleMessage = "Type what you are looking for";
+
+  if (status == "results" && query.trim() != "")
+    bubbleMessage = `Here is what you are looking for: ${query}`;
 
   return (
     <KeyboardAvoidingView
