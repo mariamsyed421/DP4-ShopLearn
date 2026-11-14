@@ -275,6 +275,7 @@ export const products: Product[] = [
     category: "household",
     image: require("../../assets/images/items/ziploc.png"),
   },
+  {
     id: "allergy",
     name: "Allergy Relief",
     cartName: "HealthA2Z® Allergy Relief (300 tablets)",
