@@ -74,7 +74,7 @@ export default function CartScreen() {
       {isEmpty ? (
         // Empty state
         <View className="flex-1 items-center justify-center px-6">
-          <Ionicons name="cart-outline" size={2000} color="#2F7A3A" />
+          <Ionicons name="cart-outline" size={200} color="#2F7A3A" />
           <Text className="text-[38px] font-bold text-[#173F27] mt-6">Your cart is empty!</Text>
           <Text className="text-[22px] font-semibold text-[#2F7A3A] mt-2">
             You haven't added any items yet.

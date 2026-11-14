@@ -2,21 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SignInScreen() {
   const insets = useSafeAreaInsets();
-  // Prefilled with the demo account so testers can tap Sign In right away
+  // demo
   const [username, setUsername] = useState("demo");
   const [password, setPassword] = useState("demo123");
   const [showPassword, setShowPassword] = useState(false);
@@ -25,14 +16,14 @@ export default function SignInScreen() {
   const [passwordError, setPasswordError] = useState("");
 
   async function handleSignIn() {
-    // Empty fields: show an error under each empty box and stop
+    // Empty fields
     const noUser = username.trim() === "";
     const noPass = password === "";
     setUsernameError(noUser ? "Please enter your username." : "");
     setPasswordError(noPass ? "Please enter your password." : "");
     if (noUser || noPass) return;
 
-    // Demo account always works
+    // Demo account 
     if (username.trim() === "demo" && password === "demo123") {
       router.push("/home");
       return;
@@ -56,7 +47,6 @@ export default function SignInScreen() {
 
   return (
     <KeyboardAvoidingView
-      // Pushes the form up so the keyboard doesn't cover the password box
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       className="flex-1 bg-white"
     >
@@ -65,7 +55,7 @@ export default function SignInScreen() {
         keyboardShouldPersistTaps="handled"
         bounces={false}
       >
-        {/* Header: title centered on the screen, back pill pinned to the left */}
+        {/* Header */}
         <View
           className="items-center justify-center"
           style={{ paddingTop: insets.top + 16, height: insets.top + 16 + 44 }}
@@ -82,9 +72,8 @@ export default function SignInScreen() {
           <Text className="text-[32px] font-bold text-[#173F27]">Sign in</Text>
         </View>
 
-        {/* Greeting + mascot. zIndex 0 keeps it underneath the card */}
+        {/* Greeting + mascot */}
         <View className="flex-row items-end mt-12 px-6" style={{ zIndex: 0 }}>
-          {/* flex-1 + items-center centers the text in the left half */}
           <View className="flex-1 items-center mb-24">
             <Text className="text-[26px] font-extrabold text-center text-[#173F27]">
               Welcome{"\n"}back!
@@ -97,8 +86,7 @@ export default function SignInScreen() {
           />
         </View>
 
-        {/* Green card. Negative top margin slides it up over the mascot,
-            zIndex 1 (and elevation for Android) draws it on top */}
+        {/* Green card */}
         <View
           className="flex-1 rounded-t-[32px] px-6 pt-10 bg-[#8BC585] justify-evenly"
           style={{
@@ -108,7 +96,7 @@ export default function SignInScreen() {
             paddingBottom: insets.bottom + 40,
           }}
         >
-          {/* Top group: the form */}
+          {/* form */}
           <View>
             {/* Username */}
             <Text className="text-[20px] font-bold mb-3 ml-1 text-[#173F27]">Username</Text>
@@ -116,11 +104,11 @@ export default function SignInScreen() {
               value={username}
               onChangeText={(t) => {
                 setUsername(t);
-                setUsernameError(""); // clear the error once they start typing
+                setUsernameError(""); // clear the error
               }}
               autoCapitalize="none"
               autoCorrect={false}
-              className={`h-[56px] text-[18px] bg-white rounded-full px-5 border-2 ${
+              className={`h-[56px] text-[18px] text-[#173F27] bg-white rounded-full px-5 border-2 ${
                 usernameError ? "border-[#7A1712]" : "border-[#2F7A3A]"
               }`}
             />
@@ -138,10 +126,10 @@ export default function SignInScreen() {
                 setPassword(t);
                 setPasswordError("");
               }}
-              secureTextEntry={!showPassword} // hidden unless the box is checked
+              secureTextEntry={!showPassword} // hidden unless box is checked
               autoCapitalize="none"
               autoCorrect={false}
-              className={`h-[56px] text-[18px] bg-white rounded-full px-5 border-2 ${
+              className={`h-[56px] text-[18px] text-[#173F27] bg-white rounded-full px-5 border-2 ${
                 passwordError ? "border-[#7A1712]" : "border-[#2F7A3A]"
               }`}
             />
@@ -151,7 +139,7 @@ export default function SignInScreen() {
               </Text>
             )}
 
-            {/* Show password checkbox */}
+            {/* Show password  */}
             <Pressable
               onPress={() => setShowPassword(!showPassword)}
               className="flex-row items-center gap-3 mt-5 ml-1 self-start"
@@ -168,7 +156,7 @@ export default function SignInScreen() {
             </Pressable>
           </View>
 
-          {/* Bottom group: button + create account link, kept close together */}
+          {/* Bottom buttons*/}
           <View className="items-center mt-10">
             <Pressable
               onPress={handleSignIn}
@@ -177,12 +165,12 @@ export default function SignInScreen() {
               <Text className="text-[20px] text-white font-bold">Sign In</Text>
             </Pressable>
 
-            <Text className="text-[18px] font-bold mt-4 text-[#173F27]">
-              Don't have an account?
-            </Text>
-            <Pressable onPress={() => router.push("/create-account")} hitSlop={8}>
-              <Text className="text-[18px] font-bold underline text-[#173F27]">Create one</Text>
-            </Pressable>
+            <View className="flex-row items-center mt-4">
+              <Text className="text-[18px] font-bold text-[#173F27]">Don't have an account? </Text>
+              <Pressable onPress={() => router.push("/create-account")} hitSlop={8}>
+                <Text className="text-[18px] font-bold underline text-[#173F27]">Create one</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </ScrollView>
