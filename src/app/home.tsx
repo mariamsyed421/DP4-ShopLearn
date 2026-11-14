@@ -10,11 +10,11 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   // Mock default
-  const [usualIds, setUsualIds] = useState<string[]>(["cheerios", "ctc", "chex"]);
+  const [usualIds, setUsualIds] = useState<string[]>(["cheerios"]);
   const [cartCount, setCartCount] = useState(0);
   const [toast, setToast] = useState(""); // "Added to cart" message, "" means hidden
 
-  // cart count stays current
+  // cart count update
   useFocusEffect(
     useCallback(() => {
       loadData();
@@ -28,7 +28,7 @@ export default function HomeScreen() {
       if (ids.length > 0) setUsualIds(ids);
     }
 
-    // cart is saved as a list like
+    // cart is saved as a list 
     const savedCart = await AsyncStorage.getItem("cart");
     const cart: string[] = savedCart ? JSON.parse(savedCart) : [];
     setCartCount(cart.length);
@@ -104,12 +104,14 @@ export default function HomeScreen() {
             <Pressable
               onPress={() => router.push({ pathname: "/help", params: { from: "home" } })}
               accessibilityLabel="Tap for help"
+              className="items-center"
             >
               <Image
                 source={require("../../assets/images/mascot.png")}
                 style={{ width: 120, height: 140 }}
                 resizeMode="contain"
               />
+              <Text className="text-[18px] font-bold text-[#173F27] -mt-2">Tap for help</Text>
             </Pressable>
           </View>
 
