@@ -8,20 +8,8 @@ import { products } from "../data/products";
 
 export default function CartScreen() {
   const insets = useSafeAreaInsets();
+  // Cart is a list of ids
   const [cartIds, setCartIds] = useState<string[]>([]);
-  const [textSize, setTextSize] = useState("medium");
-
-  useEffect(() => {
-    loadTextSize();
-  }, []);
-
-  async function loadTextSize() {
-    const saved = await AsyncStorage.getItem("preferences");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setTextSize(data.textSize || "medium");
-    }
-  }
 
   useEffect(() => {
     async function loadCart() {
@@ -31,6 +19,7 @@ export default function CartScreen() {
     loadCart();
   }, []);
 
+  // Turn the id list into entries
   const items = products
     .map((product) => ({
       product: product,
@@ -40,100 +29,139 @@ export default function CartScreen() {
 
   const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
-  async function addOne(id: string) {
-    const newCart = [...cartIds, id];
+  // Saves the new cart to the screen and to storage
+  async function saveCart(newCart: string[]) {
     setCartIds(newCart);
     await AsyncStorage.setItem("cart", JSON.stringify(newCart));
   }
 
-  async function removeOne(id: string) {
+  // + button: add the id one more time
+  function addOne(id: string) {
+    saveCart([...cartIds, id]);
+  }
+
+  // - button
+  function removeOne(id: string) {
     const position = cartIds.indexOf(id);
-    const newCart = cartIds.filter((_, index) => index !== position);
-    setCartIds(newCart);
-    await AsyncStorage.setItem("cart", JSON.stringify(newCart));
+    saveCart(cartIds.filter((_, index) => index !== position));
   }
 
-  function handleCheckout() {
-    router.push("/payment");
-   }
+  // Remove button: remove every copy of the id
+  function removeAll(id: string) {
+    saveCart(cartIds.filter((cartId) => cartId !== id));
+  }
+
+  const isEmpty = items.length === 0;
 
   return (
     <View className="flex-1 bg-white">
-      {/* Blue header */}
-      <View className="bg-[#99CBF7]" style={{ paddingTop: insets.top }}>
-        <View className="h-20 items-center justify-center">
-          <Pressable onPress={() => router.back()} className="absolute left-4" hitSlop={10}>
-            <Ionicons name="arrow-back-circle-outline" size={48} color="black" />
-          </Pressable>
-          <Text className="font-bold" style={{ fontSize: textSize === "small" ? 27 : textSize === "large" ? 36 : 32 }}>Your Cart</Text>
-        </View>
+      {/* Headerft */}
+      <View
+        className="items-center justify-center"
+        style={{ paddingTop: insets.top + 16, height: insets.top + 16 + 44 }}
+      >
+        <Pressable
+          onPress={() => router.back()}
+          className="absolute left-6 flex-row items-center h-[44px] px-3 rounded-full gap-1 bg-[#DCEFD8]"
+          style={{ top: insets.top + 16 }}
+        >
+          <Ionicons name="chevron-back" size={20} color="#173F27" />
+          <Text className="text-[18px] font-bold text-[#173F27]">Back</Text>
+        </Pressable>
+        <Text className="text-[32px] font-bold text-[#173F27]">Your Cart</Text>
       </View>
 
-      <ScrollView className="flex-1" contentContainerClassName="px-5 pt-12 pb-6">
-        {items.length === 0 ? (
-          <Text className="text-center" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>Your cart is empty</Text>
-        ) : (
-          <>
-            {/* Cart items */}
-            {items.map((item) => (
-              <View key={item.product.id} className="bg-[#99CBF7] rounded-2xl p-4 mb-4">
-                <View className="flex-row">
-                  <View className="w-[90px] h-[90px] bg-white rounded-xl items-center justify-center">
-                    <Image source={item.product.image} style={{ width: 70, height: 80 }} resizeMode="contain" />
-                  </View>
-                  <View className="flex-1 ml-4">
-                    <Text className="font-semibold" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>{item.product.cartName}</Text>
-                    <Text className="font-bold text-[#333] mt-2" style={{ fontSize: textSize === "small" ? 19 : textSize === "large" ? 26 : 22 }}>
-                      ${(item.product.price * item.quantity).toFixed(2)}
-                    </Text>
-                  </View>
-                </View>
+      {isEmpty ? (
+        // Empty state
+        <View className="flex-1 items-center justify-center px-6">
+          <Ionicons name="cart-outline" size={2000} color="#2F7A3A" />
+          <Text className="text-[38px] font-bold text-[#173F27] mt-6">Your cart is empty!</Text>
+          <Text className="text-[22px] font-semibold text-[#2F7A3A] mt-2">
+            You haven't added any items yet.
+          </Text>
+          <Pressable
+            onPress={() => router.replace("/home")}
+            className="w-full max-w-[300px] h-[60px] rounded-3xl items-center justify-center bg-[#2F7A3A] mt-12"
+          >
+            <Text className="text-[22px] font-bold text-white">Continue Shopping</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <ScrollView className="flex-1" contentContainerClassName="px-6 pt-8 pb-6">
+          {/* Cart items */}
+          {items.map((item) => (
+            <View
+              key={item.product.id}
+              className="flex-row bg-[#DCEFD8] border-2 border-[#8BC585] rounded-2xl p-3 mb-4"
+            >
+              {/* Product picture */}
+              <View className="w-[84px] h-[96px] bg-white rounded-xl items-center justify-center">
+                <Image source={item.product.image} style={{ width: 68, height: 84 }} resizeMode="contain" />
+              </View>
 
-                <View className="flex-row items-center justify-center mt-4">
+              <View className="flex-1 ml-4">
+                <Text className="text-[18px] font-bold text-[#173F27]">{item.product.cartName}</Text>
+                <Text className="text-[16px] text-[#173F27] mt-1">
+                  ${item.product.price.toFixed(2)} each
+                </Text>
+
+                {/* -  + and remove */}
+                <View className="flex-row items-center mt-3">
                   <Pressable
                     onPress={() => removeOne(item.product.id)}
-                    className="w-[44px] h-[44px] bg-white rounded-full items-center justify-center"
+                    className="w-[40px] h-[40px] bg-white border-2 border-[#173F27] rounded-full items-center justify-center"
                   >
-                    <Text className="font-bold" style={{ fontSize: 28 }}>-</Text>
+                    <Text className="text-[24px] leading-[26px] font-bold text-[#173F27]">−</Text>
                   </Pressable>
-                  <Text className="font-bold mx-6" style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 30 : 26 }}>
-                    x {item.quantity}
-                  </Text>
+                  <Text className="text-[20px] font-bold text-[#173F27] mx-4">{item.quantity}</Text>
                   <Pressable
                     onPress={() => addOne(item.product.id)}
-                    className="w-[44px] h-[44px] bg-white rounded-full items-center justify-center"
+                    className="w-[40px] h-[40px] bg-white border-2 border-[#173F27] rounded-full items-center justify-center"
                   >
-                    <Text className="font-bold" style={{ fontSize: 28 }}>+</Text>
+                    <Text className="text-[24px] leading-[26px] font-bold text-[#173F27]">+</Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => removeAll(item.product.id)}
+                    className="flex-row items-center h-[40px] px-3 rounded-full gap-1 bg-white border-2 border-[#E5534B] ml-auto"
+                  >
+                    <Ionicons name="trash-outline" size={18} color="#E5534B" />
+                    <Text className="text-[16px] font-bold text-[#E5534B]">Remove</Text>
                   </Pressable>
                 </View>
               </View>
-            ))}
+            </View>
+          ))}
 
-            {/* Total and checkout */}
-            <Text className="font-bold self-end mt-4" style={{ fontSize: textSize === "small" ? 26 : textSize === "large" ? 35 : 30 }}>total: ${total.toFixed(2)}</Text>
-            <Pressable
-              onPress={handleCheckout}
-              className="bg-[#4CAA45] px-6 py-2 rounded-full self-end mt-6"
-            >
-              <Text className="text-white font-semibold" style={{ fontSize: textSize === "small" ? 20 : textSize === "large" ? 28 : 24 }}>Checkout</Text>
-            </Pressable>
-          </>
-        )}
-      </ScrollView>
+          {/* Total and checkout */}
+          <Text className="text-[28px] font-bold text-[#173F27] self-end mt-2">
+            Total: ${total.toFixed(2)}
+          </Text>
+          <Pressable
+            onPress={() => router.push("/payment")}
+            className="w-full h-[60px] rounded-2xl items-center justify-center bg-[#2F7A3A] mt-6"
+          >
+            <Text className="text-[22px] font-bold text-white">Checkout</Text>
+          </Pressable>
+        </ScrollView>
+      )}
 
-      {/*  mascot */}
+      {/* Mascot + help */}
       <Pressable
         onPress={() => router.push({ pathname: "/help", params: { from: "cart" } })}
-        className="items-start px-5"
+        className="flex-row items-end px-6"
         style={{ paddingBottom: insets.bottom + 16 }}
       >
-        <View className="items-center">
-          <Image
-            source={require("../../assets/images/mascot.png")}
-            style={{ width: 80, height: 95 }}
-            resizeMode="contain"
-          />
-          <Text className="font-semibold" style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 21 : 18 }}>Tap for help</Text>
+        <Image
+          source={require("../../assets/images/mascot.png")}
+          style={{ width: 90, height: 105 }}
+          resizeMode="contain"
+        />
+        <View className="flex-1 ml-3 mb-2 bg-[#DCEFD8] border-2 border-[#97CB91] rounded-2xl px-4 py-4">
+          <Text className="text-[18px] font-medium text-center text-[#173F27]">
+            {isEmpty ? "Need help finding items?" : "Need help with your cart?"}
+            {"\n"}Tap here!
+          </Text>
         </View>
       </Pressable>
     </View>

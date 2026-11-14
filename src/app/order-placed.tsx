@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
-import { Image, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { useEffect, useState } from "react";
+import { Image, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { products } from "../data/products";
 
