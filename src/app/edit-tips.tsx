@@ -44,7 +44,7 @@ export default function EditTipsScreen() {
           }}
         >
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/tips"))}
             hitSlop={10}
             style={{ position: "absolute", left: 16 }}
           >

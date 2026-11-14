@@ -38,7 +38,7 @@ export default function TipsScreen() {
           }}
         >
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/account-setup"))}
             style={{
               width: 48,
               height: 48,
@@ -175,7 +175,7 @@ export default function TipsScreen() {
           </Pressable>
 
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/account-setup"))}
             style={{
               borderWidth: 3,
               borderColor: "#4A72B0",

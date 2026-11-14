@@ -43,7 +43,7 @@ export default function UsualItemsScreen() {
           }}
         >
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/account-setup"))}
             style={{
               width: 48,
               height: 48,
@@ -100,7 +100,7 @@ export default function UsualItemsScreen() {
 
         <View style={{ paddingHorizontal: 30, paddingBottom: 30 }}>
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/account-setup"))}
             style={{
               backgroundColor: "#6AAA50",
               paddingVertical: 15,

@@ -17,7 +17,9 @@ export default function PickItemsScreen() {
   const [textSize, setTextSize] = useState("medium");
   const [picked, setPicked] = useState<string[]>([]);
 
-  const categoryProducts = category === "grocery" ? products : [];
+  const categoryProducts = products.filter(
+    (product) => product.category === category
+  );
 
   useEffect(() => {
     loadSettings();
@@ -61,7 +63,7 @@ export default function PickItemsScreen() {
           }}
         >
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/usual-items"))}
             style={{
               width: 48,
               height: 48,
@@ -155,7 +157,7 @@ export default function PickItemsScreen() {
           ))}
 
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/usual-items"))}
             style={{
               backgroundColor: "#6AAA50",
               paddingVertical: 15,
