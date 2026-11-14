@@ -27,11 +27,12 @@ export default function RecordTipScreen() {
     RecordingPresets.HIGH_QUALITY,
     (status) => console.log('Recording status: ', status)
   )
-  const player = useAudioPlayer("file:///var/mobile/Containers/Data/Application/4CF30DC3-6A4D-459A-89E4-25D46D88EA98/Library/Caches/ExpoAudio/recording-C4A18D57-77FF-4175-AACB-5F90E674E2D0.m4a");
+  const player = useAudioPlayer();
   function playBack() {
     if(player.playing)
       player.pause();
     else{
+      player.seekTo(0);
       player.play();
     }
   }
@@ -74,12 +75,25 @@ export default function RecordTipScreen() {
       }
     } else {
       await recorder.stop();
+      console.log("after stop:", recorder.uri);
+      if (recorder.uri)
+        player.replace(recorder.uri);
       setStatus("done");
     }
     setError("");
   }
 
-  function handleRecordAgain() {
+  async function handleRecordAgain() {
+    const p = await perms();
+    if(!p)
+      return;
+    await recorder.stop();
+    await setAudioModeAsync ({
+        allowsRecording: true,
+        playsInSilentMode: true
+    });
+    await recorder.prepareToRecordAsync();
+    await startRec();
     setStatus("recording");
     setError("");
   }
@@ -244,7 +258,14 @@ export default function RecordTipScreen() {
                 {error}
               </Text>
             )}
-            <Pressable onPress={() => player.play()}><Text>Play</Text></Pressable>
+            <Pressable onPress={playBack}
+              style={{
+                backgroundColor: "#6AAA50",
+                paddingVertical: 15,
+                borderRadius: 15,
+                alignItems: "center",
+                marginBottom: 12,
+              }}><Text style={{ color: "#fff", fontSize: labelSize, fontWeight: "bold" }}>Play</Text></Pressable>
             <Pressable
               onPress={handleSave}
               style={{
