@@ -1,56 +1,77 @@
-# Welcome to your Expo app 👋
+# ShopLearn
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+ShopLearn is a shopping app built for older adults who feel unsure about buying things online. It uses big buttons, plain words, and a friendly helper that can listen to you and talk back, so nobody has to figure things out alone.
 
-## Get started
+This is our DP4 prototype for CS 4352 (Human-Computer Interaction), made by Team 06, "Five Forward."
 
-1. Install dependencies
+**Demo video:** <! YOUTUBE !>
+
+## What you can do in the app
+
+We built the app around three tasks:
+
+1. **Simple task: buy a usual item again.** Tap one of your usual items on Home and add it to your cart.
+2. **Moderate task: find something new.** Search by voice or by typing, look at the item, and add it to your cart.
+3. **Complex task: set up your account.** Sign up, add your card and address, and pick your preferences, like text size and voice speed.
+
+Other things you will find along the way:
+
+- **Check out with a spoken summary.** The app reads your order out loud, including the total, before you place it. You can turn this off or change the speed in Preferences.
+- **Help page.** Say something like "help with checkout" and the app finds the right tip and plays it. If there is no recorded tip, it still tells you the answer.
+- **Record your own tips.** A family member can record a tip, save it, and play it back later from the Help page.
+- **Past orders.** Look at old orders, cancel one, or reorder it with one tap.
+
+## How to run it
+
+You need Node.js and the Expo Go app on your iPhone. We tested on iPhone in portrait mode.
+
+1. Download or clone this project and open the folder in a terminal.
+2. Install everything:
 
    ```bash
-   npm install
+   npm install --legacy-peer-deps
    ```
 
-2. Start the app
+   On Windows PowerShell, use `npm.cmd` instead of `npm`.
+
+3. The voice search needs an ElevenLabs key. Make a file named `.env` in the main folder and put this on one line, with no quotes or spaces:
+
+   ```
+   EXPO_PUBLIC_ELEVENLABS_API_KEY=your_key_here
+   ```
+
+   The app still runs without a key. Only speaking to search or ask for help will not work, and typing still does.
+
+4. Start the app:
 
    ```bash
-   npx expo start
+   npx expo start --clear
    ```
 
-In the output, you'll find options to open the app in a
+   On Windows PowerShell, use `npx.cmd`.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+5. Scan the QR code with your iPhone camera to open it in Expo Go.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+If you change the `.env` file, stop the app and start it again with `--clear`.
 
-## Get a fresh project
+## What it is built with
 
-When you're ready, run:
+- Expo and React Native with Expo Router
+- TypeScript and NativeWind (Tailwind styling)
+- AsyncStorage to remember your cart, orders, and settings
+- expo-audio to record and play audio
+- ElevenLabs speech-to-text so you can talk to the app
+- expo-speech so the app can read things out loud
 
-```bash
-npm run reset-project
-```
+All the products are made up and stored in the app, so nothing real is ever bought.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Who did what
 
-### Other setup steps
+- **Ayesha and Aamena:** redesigned the account setup pages (the complex task)
+- **Mariam:** redesigned the simple and moderate task pages
+- **Divya:** speech-to-text and text-to-speech
+- **Ammarah:** merged everyone's code, fixed conflicts, and added the Help page, reorder, and read-aloud order summary
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Team
 
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Team 06, Five Forward. CS 4352, The University of Texas at Dallas.
