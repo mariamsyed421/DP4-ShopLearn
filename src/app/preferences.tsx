@@ -55,7 +55,7 @@ export default function PreferencesScreen() {
       <View style={{ flex: 1 }}>
         <View
           style={{
-            backgroundColor: "#A9C7F2",
+            backgroundColor: "#FFFFFF",
             paddingHorizontal: 18,
             paddingVertical: 12,
             flexDirection: "row",
@@ -63,18 +63,28 @@ export default function PreferencesScreen() {
           }}
         >
           <Pressable
-            onPress={() => (router.canGoBack() ? router.back() : router.replace("/account-setup"))}
+            //onPress={() => (router.canGoBack() ? router.back() : router.replace("/account-setup"))}
+             onPress={() => router.back()}
             style={{
-              width: 48,
-              height: 48,
-              borderRadius: 30,
-              borderWidth: 2,
-              borderColor: "black",
-              alignItems: "center",
-              justifyContent: "center",
+               backgroundColor: "#DCEFD9",
+               paddingHorizontal: 16,
+               paddingVertical: 5,
+               borderRadius: 25,
+               alignItems: "center",
+               justifyContent: "center",
+              //width: 48,
+              //height: 48,
+              //borderRadius: 30,
+              //borderWidth: 2,
+              //borderColor: "black",
+              //alignItems: "center",
+              //justifyContent: "center",
             }}
           >
-            <Text style={{ fontSize: 30 }}>←</Text>
+             <Text style={{ color: "#173F27" }}>
+              <Text style={{ fontSize: 24, fontWeight: "bold" }}>‹</Text>
+              <Text style={{ fontSize: 18, fontWeight: "bold" }}> Back</Text>
+            </Text>
           </Pressable>
 
           <Text
@@ -82,6 +92,7 @@ export default function PreferencesScreen() {
               fontSize: 28,
               fontWeight: "bold",
               marginLeft: 10,
+              color: "#173F27",
             }}
           >
             Preferences
@@ -95,6 +106,7 @@ export default function PreferencesScreen() {
             paddingBottom: 25,
           }}
         >
+          
           <View
             style={{
               flexDirection: "row",
@@ -102,18 +114,73 @@ export default function PreferencesScreen() {
               justifyContent: "center",
             }}
           >
+            {/* Decorative lines */}
+            <View
+              style={{
+                width: 30,
+                height: 60,
+                marginRight: 5,
+                justifyContent: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: 2,
+                  height: 9,
+                  backgroundColor: "#173F27",
+                  marginLeft: 20,
+                  marginBottom: 8,
+                  transform: [{ rotate: "-20deg" }],
+                }}
+              />
+
+              <View
+                style={{
+                  width: 9,
+                  height: 2,
+                  backgroundColor: "#173F27",
+                  marginLeft: 5,
+                  marginBottom: 12,
+                  transform: [{ rotate: "25deg" }],
+                }}
+              />
+
+              <View
+                style={{
+                  width: 10,
+                  height: 2,
+                  backgroundColor: "#173F27",
+                  marginLeft: 2,
+                  marginBottom: 12,
+                }}
+              />
+
+              <View
+                style={{
+                  width: 9,
+                  height: 2,
+                  backgroundColor: "#173F27",
+                  marginLeft: 8,
+                  transform: [{ rotate: "-25deg" }],
+                }}
+              />
+            </View>
+
+            {/* Heading */}
             <Text
               style={{
                 fontSize: headingSize,
                 fontWeight: "bold",
-                textAlign: "center",
+                textAlign: "left",
                 flexShrink: 1,
+                color: "#173F27",
               }}
             >
               You can change{"\n"}
-              this anytime
+              this anytime!
             </Text>
 
+            {/* Mascot */}
             <Image
               source={require("../../assets/images/mascot.png")}
               style={{
@@ -125,12 +192,14 @@ export default function PreferencesScreen() {
             />
           </View>
 
+
           <Text
             style={{
               fontSize: headingSize,
               fontWeight: "bold",
               marginTop: 20,
               marginBottom: 12,
+              color: "#173F27",
             }}
           >
             Text size
@@ -143,15 +212,20 @@ export default function PreferencesScreen() {
                 flex: 1,
                 paddingVertical: 10,
                 borderWidth: 2,
-                borderColor: "#7194E8",
+                borderColor: "#173F27",
                 alignItems: "center",
-                backgroundColor: textSize === "small" ? "#D9E6FA" : "#fff",
+                marginLeft: 5,
+                borderTopLeftRadius: 25,
+                borderBottomLeftRadius: 25,
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0,
+                backgroundColor: textSize === "small" ? "#DCEFD8" : "#fff",
               }}
             >
               <Text
                 style={{
-                  fontSize: 18,
-                  color: "#3F577E",
+                  fontSize: 24,
+                  color: "#173F27",
                   fontWeight: "600",
                 }}
               >
@@ -165,16 +239,17 @@ export default function PreferencesScreen() {
                 flex: 1,
                 paddingVertical: 10,
                 borderWidth: 2,
-                borderColor: "#7194E8",
+                borderColor: "#173F27",
                 alignItems: "center",
                 marginLeft: 5,
-                backgroundColor: textSize === "medium" ? "#D9E6FA" : "#fff",
+                borderRadius: 0,
+                backgroundColor: textSize === "medium" ? "#DCEFD8" : "#fff",
               }}
             >
               <Text
                 style={{
-                  fontSize: 23,
-                  color: "#3F577E",
+                  fontSize: 30,
+                  color: "#173F27",
                   fontWeight: "600",
                 }}
               >
@@ -188,16 +263,20 @@ export default function PreferencesScreen() {
                 flex: 1,
                 paddingVertical: 10,
                 borderWidth: 2,
-                borderColor: "#7194E8",
+                borderColor: "#173F27",
                 alignItems: "center",
                 marginLeft: 5,
-                backgroundColor: textSize === "large" ? "#D9E6FA" : "#fff",
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+                borderTopRightRadius: 25,
+                borderBottomRightRadius: 25,
+                backgroundColor: textSize === "large" ? "#DCEFD8" : "#fff",
               }}
             >
               <Text
                 style={{
-                  fontSize: 28,
-                  color: "#3F577E",
+                  fontSize: 36,
+                  color: "#173F27",
                   fontWeight: "600",
                 }}
               >
@@ -211,6 +290,7 @@ export default function PreferencesScreen() {
               fontSize: headingSize,
               fontWeight: "bold",
               marginTop: 20,
+              color: "#173F27",
             }}
           >
             Spoken order read back
@@ -220,10 +300,11 @@ export default function PreferencesScreen() {
             style={{
               fontSize: normalSize,
               marginTop: 5,
+              color: "#173F27",
             }}
           >
-            The app will read your order{"\n"}
-            out loud before checkout
+            Hear your order read aloud{"\n"}
+            before checkout
           </Text>
 
           <View
@@ -239,7 +320,7 @@ export default function PreferencesScreen() {
                 height: 36,
                 borderRadius: 30,
                 justifyContent: "center",
-                backgroundColor: spokenReadback ? "#405A86" : "#C7C7C7",
+                backgroundColor: spokenReadback ? "#2F7A3A" : "#C7C7C7",
               }}
             >
               <View
@@ -259,6 +340,7 @@ export default function PreferencesScreen() {
               fontSize: headingSize,
               fontWeight: "bold",
               marginTop: 20,
+              color: "#173F27",
             }}
           >
             Companion voice speed
@@ -276,15 +358,20 @@ export default function PreferencesScreen() {
                 flex: 1,
                 paddingVertical: 10,
                 borderWidth: 2,
-                borderColor: "#7194E8",
+                borderColor: "#173F27",
                 alignItems: "center",
-                backgroundColor: voiceSpeed === "slow" ? "#D9E6FA" : "#fff",
+                marginLeft: 5,
+                borderTopLeftRadius: 25,
+                borderBottomLeftRadius: 25,
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0,
+                backgroundColor: voiceSpeed === "slow" ? "#DCEFD8" : "#fff",
               }}
             >
               <Text
                 style={{
                   fontSize: normalSize,
-                  color: "#3F577E",
+                  color: "#173F27",
                   fontWeight: "600",
                 }}
               >
@@ -298,16 +385,17 @@ export default function PreferencesScreen() {
                 flex: 1,
                 paddingVertical: 10,
                 borderWidth: 2,
-                borderColor: "#7194E8",
+                borderColor: "#173F27",
                 alignItems: "center",
                 marginLeft: 5,
-                backgroundColor: voiceSpeed === "normal" ? "#D9E6FA" : "#fff",
+                borderRadius: 0,
+                backgroundColor: voiceSpeed === "normal" ? "#DCEFD8" : "#fff",
               }}
             >
               <Text
                 style={{
                   fontSize: normalSize,
-                  color: "#3F577E",
+                  color: "#173F27",
                   fontWeight: "600",
                 }}
               >
@@ -321,16 +409,20 @@ export default function PreferencesScreen() {
                 flex: 1,
                 paddingVertical: 10,
                 borderWidth: 2,
-                borderColor: "#7194E8",
+                borderColor: "#173F27",
                 alignItems: "center",
                 marginLeft: 5,
-                backgroundColor: voiceSpeed === "fast" ? "#D9E6FA" : "#fff",
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+                borderTopRightRadius: 25,
+                borderBottomRightRadius: 25,
+                backgroundColor: voiceSpeed === "fast" ? "#DCEFD8" : "#fff",
               }}
             >
               <Text
                 style={{
                   fontSize: normalSize,
-                  color: "#3F577E",
+                  color: "#173F27",
                   fontWeight: "600",
                 }}
               >
@@ -342,7 +434,7 @@ export default function PreferencesScreen() {
           <Pressable
             onPress={saveSettings}
             style={{
-              backgroundColor: "#6AAA50",
+              backgroundColor: "#2F7A3A",
               paddingVertical: 15,
               borderRadius: 15,
               alignItems: "center",

@@ -1,5 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
@@ -30,7 +30,7 @@ export default function TipsScreen() {
       <View style={{ flex: 1 }}>
         <View
           style={{
-            backgroundColor: "#A9C7F2",
+            backgroundColor: "#FFFFFF",
             paddingHorizontal: 18,
             paddingVertical: 12,
             flexDirection: "row",
@@ -38,21 +38,23 @@ export default function TipsScreen() {
           }}
         >
           <Pressable
-            onPress={() => (router.canGoBack() ? router.back() : router.replace("/account-setup"))}
+          onPress={() => router.back()}
             style={{
-              width: 48,
-              height: 48,
-              borderRadius: 30,
-              borderWidth: 2,
-              borderColor: "black",
-              alignItems: "center",
-              justifyContent: "center",
+               backgroundColor: "#DCEFD9",
+               paddingHorizontal: 16,
+               paddingVertical: 5,
+               borderRadius: 25,
+               alignItems: "center",
+               justifyContent: "center",
             }}
           >
-            <Text style={{ fontSize: 30 }}>←</Text>
+             <Text style={{ color: "#173F27" }}>
+              <Text style={{ fontSize: 24, fontWeight: "bold" }}>‹</Text>
+              <Text style={{ fontSize: 18, fontWeight: "bold" }}> Back</Text>
+            </Text>
           </Pressable>
 
-          <Text style={{ fontSize: titleSize, fontWeight: "bold", marginLeft: 10 }}>
+          <Text style={{ fontSize: titleSize, fontWeight: "bold", marginLeft: 10, color: "#173F27" }}>
             Set up tips
           </Text>
         </View>
@@ -71,12 +73,66 @@ export default function TipsScreen() {
               justifyContent: "center",
             }}
           >
+            {/* Decorative lines */}
+            <View
+              style={{
+                width: 30,
+                height: 60,
+                marginRight: 5,
+                justifyContent: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: 2,
+                  height: 9,
+                  backgroundColor: "#173F27",
+                  marginLeft: 20,
+                  marginBottom: 8,
+                  transform: [{ rotate: "-20deg" }],
+                }}
+              />
+
+              <View
+                style={{
+                  width: 9,
+                  height: 2,
+                  backgroundColor: "#173F27",
+                  marginLeft: 5,
+                  marginBottom: 12,
+                  transform: [{ rotate: "25deg" }],
+                }}
+              />
+
+              <View
+                style={{
+                  width: 10,
+                  height: 2,
+                  backgroundColor: "#173F27",
+                  marginLeft: 2,
+                  marginBottom: 12,
+                }}
+              />
+
+              <View
+                style={{
+                  width: 9,
+                  height: 2,
+                  backgroundColor: "#173F27",
+                  marginLeft: 8,
+                  transform: [{ rotate: "-25deg" }],
+                }}
+              />
+            </View>
+
+            {/* Heading */}
             <Text
               style={{
                 fontSize: headingSize,
                 fontWeight: "bold",
-                textAlign: "center",
+                textAlign: "left",
                 flexShrink: 1,
+                color: "#173F27",
               }}
             >
               Want to add tips{"\n"}
@@ -84,14 +140,19 @@ export default function TipsScreen() {
               need help?
             </Text>
 
+            {/* Mascot */}
             <Image
               source={require("../../assets/images/mascot.png")}
-              style={{ width: 90, height: 90, marginLeft: 8 }}
+              style={{
+                width: 90,
+                height: 90,
+                marginLeft: 8,
+              }}
               resizeMode="contain"
             />
           </View>
 
-          <Text style={{ fontSize: normalSize, marginTop: 15, marginBottom: 25 }}>
+          <Text style={{ fontSize: normalSize, marginTop: 15, marginBottom: 65, color: "#173F27" }}>
             A tip is a short message that plays when you tap for help. A family
             member can record it too.
           </Text>
@@ -101,50 +162,24 @@ export default function TipsScreen() {
             style={{
               flexDirection: "row",
               alignItems: "center",
-              backgroundColor: "#BFD8F8",
+              backgroundColor: "#DCEFD8",
               borderRadius: 15,
               paddingVertical: 18,
               paddingHorizontal: 20,
-              marginBottom: 16,
+              marginBottom: 30,
             }}
           >
-            <MaterialCommunityIcons name="microphone" size={30} color="black" />
+            <MaterialCommunityIcons name="microphone" size={30} color="#173F27" />
             <Text
               style={{
                 flex: 1,
                 textAlign: "center",
                 fontSize: buttonSize,
                 fontWeight: "bold",
-                color: "#4B4B4B",
+                color: "#173F27",
               }}
             >
               Record audio
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => router.push({ pathname: "/record-tip", params: { type: "video" } })}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: "#BFD8F8",
-              borderRadius: 15,
-              paddingVertical: 18,
-              paddingHorizontal: 20,
-              marginBottom: 16,
-            }}
-          >
-            <MaterialCommunityIcons name="camera" size={30} color="black" />
-            <Text
-              style={{
-                flex: 1,
-                textAlign: "center",
-                fontSize: buttonSize,
-                fontWeight: "bold",
-                color: "#4B4B4B",
-              }}
-            >
-              Record video
             </Text>
           </Pressable>
 
@@ -153,21 +188,21 @@ export default function TipsScreen() {
             style={{
               flexDirection: "row",
               alignItems: "center",
-              backgroundColor: "#BFD8F8",
+              backgroundColor: "#DCEFD8",
               borderRadius: 15,
               paddingVertical: 18,
               paddingHorizontal: 20,
               marginBottom: 16,
             }}
           >
-            <MaterialCommunityIcons name="pencil" size={30} color="black" />
+            <MaterialCommunityIcons name="pencil" size={30} color="#173F27" />
             <Text
               style={{
                 flex: 1,
                 textAlign: "center",
                 fontSize: buttonSize,
                 fontWeight: "bold",
-                color: "#4B4B4B",
+                color: "#173F27",
               }}
             >
               Edit my tips
@@ -178,14 +213,14 @@ export default function TipsScreen() {
             onPress={() => (router.canGoBack() ? router.back() : router.replace("/account-setup"))}
             style={{
               borderWidth: 3,
-              borderColor: "#4A72B0",
+              borderColor: "#2F7A3A",
               borderRadius: 15,
               paddingVertical: 16,
               alignItems: "center",
-              marginTop: 10,
+              marginTop: 90,
             }}
           >
-            <Text style={{ color: "#4A72B0", fontSize: buttonSize, fontWeight: "bold" }}>
+            <Text style={{ color: "#2F7A3A", fontSize: buttonSize, fontWeight: "bold" }}>
               Not now
             </Text>
           </Pressable>

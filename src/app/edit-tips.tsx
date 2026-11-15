@@ -1,5 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
@@ -37,21 +37,37 @@ export default function EditTipsScreen() {
       <View style={{ flex: 1 }}>
         <View
           style={{
-            backgroundColor: "#A9C7F2",
+            backgroundColor: "#ffffff",
             height: 80,
             alignItems: "center",
             justifyContent: "center",
           }}
         >
           <Pressable
-            onPress={() => (router.canGoBack() ? router.back() : router.replace("/tips"))}
-            hitSlop={10}
-            style={{ position: "absolute", left: 16 }}
+            onPress={() => 
+               router.canGoBack()
+                ? router.back()
+                : router.replace("/tips")
+                }
+            style={{
+                position: "absolute",
+                left: 16,
+                top: 10,
+                backgroundColor: "#DCEFD9",
+               paddingHorizontal: 16,
+               paddingVertical: 5,
+               borderRadius: 25,
+               alignItems: "center",
+               justifyContent: "center",
+            }}
           >
-            <Ionicons name="arrow-back-circle-outline" size={48} color="black" />
+             <Text style={{ color: "#173F27" }}>
+              <Text style={{ fontSize: 24, fontWeight: "bold" }}>‹</Text>
+              <Text style={{ fontSize: 18, fontWeight: "bold" }}> Back</Text>
+            </Text>
           </Pressable>
 
-          <Text style={{ fontSize: titleSize, fontWeight: "bold" }}>Saved tips</Text>
+          <Text style={{ fontSize: titleSize, fontWeight: "bold", color: "#173F27" }}>Edit my tips</Text>
         </View>
 
         <ScrollView
@@ -68,12 +84,66 @@ export default function EditTipsScreen() {
               justifyContent: "center",
             }}
           >
+            {/* Decorative lines */}
+            <View
+              style={{
+                width: 30,
+                height: 60,
+                marginRight: 5,
+                justifyContent: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: 2,
+                  height: 9,
+                  backgroundColor: "#173F27",
+                  marginLeft: 20,
+                  marginBottom: 8,
+                  transform: [{ rotate: "-20deg" }],
+                }}
+              />
+
+              <View
+                style={{
+                  width: 9,
+                  height: 2,
+                  backgroundColor: "#173F27",
+                  marginLeft: 5,
+                  marginBottom: 12,
+                  transform: [{ rotate: "25deg" }],
+                }}
+              />
+
+              <View
+                style={{
+                  width: 10,
+                  height: 2,
+                  backgroundColor: "#173F27",
+                  marginLeft: 2,
+                  marginBottom: 12,
+                }}
+              />
+
+              <View
+                style={{
+                  width: 9,
+                  height: 2,
+                  backgroundColor: "#173F27",
+                  marginLeft: 8,
+                  transform: [{ rotate: "-25deg" }],
+                }}
+              />
+            </View>
+
+            {/* Heading */}
             <Text
               style={{
                 fontSize: headingSize,
                 fontWeight: "bold",
-                textAlign: "center",
+                textAlign: "left",
                 flexShrink: 1,
+                color: "#173F27",
               }}
             >
               Want to add tips{"\n"}
@@ -81,9 +151,14 @@ export default function EditTipsScreen() {
               need help?
             </Text>
 
+            {/* Mascot */}
             <Image
               source={require("../../assets/images/mascot.png")}
-              style={{ width: 90, height: 90, marginLeft: 8 }}
+              style={{
+                width: 90,
+                height: 90,
+                marginLeft: 8,
+              }}
               resizeMode="contain"
             />
           </View>
@@ -95,9 +170,10 @@ export default function EditTipsScreen() {
               textAlign: "center",
               marginTop: 30,
               marginBottom: 16,
+              color: "#173F27",
             }}
           >
-            Edit my tips
+            Saved tips
           </Text>
 
           {tips.map((tip) => (
@@ -109,7 +185,7 @@ export default function EditTipsScreen() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: "#BFD8F8",
+                backgroundColor: "#DCEFD8",
                 borderRadius: 12,
                 paddingVertical: 18,
                 paddingHorizontal: 24,
@@ -128,7 +204,7 @@ export default function EditTipsScreen() {
           <Pressable
             onPress={() => router.dismissTo("/account-setup")}
             style={{
-              backgroundColor: "#6AAA50",
+              backgroundColor: "#2F7A3A",
               paddingVertical: 14,
               borderRadius: 15,
               alignItems: "center",

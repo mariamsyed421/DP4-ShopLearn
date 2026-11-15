@@ -136,7 +136,7 @@ export default function RecordTipScreen() {
       <View style={{ flex: 1 }}>
         <View
           style={{
-            backgroundColor: "#A9C7F2",
+            backgroundColor: "#FFFFFF",
             paddingHorizontal: 18,
             paddingVertical: 12,
             flexDirection: "row",
@@ -144,21 +144,23 @@ export default function RecordTipScreen() {
           }}
         >
           <Pressable
-            onPress={() => (router.canGoBack() ? router.back() : router.replace("/edit-tips"))}
+             onPress={() => router.back()}
             style={{
-              width: 48,
-              height: 48,
-              borderRadius: 30,
-              borderWidth: 2,
-              borderColor: "black",
-              alignItems: "center",
-              justifyContent: "center",
+               backgroundColor: "#DCEFD9",
+               paddingHorizontal: 16,
+               paddingVertical: 5,
+               borderRadius: 25,
+               alignItems: "center",
+               justifyContent: "center",
             }}
           >
-            <Text style={{ fontSize: 30 }}>←</Text>
+             <Text style={{ color: "#173F27" }}>
+              <Text style={{ fontSize: 24, fontWeight: "bold" }}>‹</Text>
+              <Text style={{ fontSize: 18, fontWeight: "bold" }}> Back</Text>
+            </Text>
           </Pressable>
 
-          <Text style={{ fontSize: titleSize, fontWeight: "bold", marginLeft: 10 }}>
+          <Text style={{ fontSize: titleSize, fontWeight: "bold", marginLeft: 10, color: "#173F27" }}>
             {isVideo ? "Record Video" : "Record Audio"}
           </Text>
         </View>
@@ -191,7 +193,7 @@ export default function RecordTipScreen() {
                 <MaterialCommunityIcons
                   name="video"
                   size={64}
-                  color={status === "recording" ? "#C0392B" : "#7A7A7A"}
+                  color={status === "recording" ? "#C0392B" : "#2F7A3A"}
                 />
               ) : (
                 <Image
@@ -200,19 +202,19 @@ export default function RecordTipScreen() {
                       ? require("../../assets/images/mic-active.png")
                       : require("../../assets/images/mic-inactive.png")
                   }
-                  style={{ width: 64, height: 64 }}
+                  style={{ width: 64, height: 64, tintColor: "#2F7A3A" }}
                   resizeMode="contain"
                 />
               )}
             </View>
 
-            <Text style={{ fontSize: normalSize, fontWeight: "600", marginTop: 14 }}>
+            <Text style={{ fontSize: nameSize, fontWeight: "600", marginTop: 14, color: "#173F27" }}>
               {message}
             </Text>
           </Pressable>
 
           <View style={{ alignItems: "center", marginVertical: 30 }}>
-            <Text style={{ fontSize: nameSize, fontWeight: "bold" }}>Tip name:</Text>
+            <Text style={{ fontSize: nameSize, fontWeight: "bold", color: "#173F27" }}>Tip name:</Text>
 
             <TextInput
               value={name}
@@ -248,7 +250,7 @@ export default function RecordTipScreen() {
             <Pressable
               onPress={handleSave}
               style={{
-                backgroundColor: "#6AAA50",
+                backgroundColor: "#2F7A3A",
                 paddingVertical: 15,
                 borderRadius: 15,
                 alignItems: "center",
@@ -265,13 +267,13 @@ export default function RecordTipScreen() {
               onPress={handleRecordAgain}
               style={{
                 borderWidth: 2,
-                borderColor: "#6AAA50",
+                borderColor: "#2F7A3A",
                 paddingVertical: 13,
                 borderRadius: 15,
                 alignItems: "center",
               }}
             >
-              <Text style={{ color: "#5C9F4B", fontSize: labelSize, fontWeight: "bold" }}>
+              <Text style={{ color: "#2F7A3A", fontSize: labelSize, fontWeight: "bold" }}>
                 Record again
               </Text>
             </Pressable>
