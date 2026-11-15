@@ -4,7 +4,7 @@ ShopLearn is a shopping app built for older adults who feel unsure about buying 
 
 This is our DP4 prototype for CS 4352 (Human-Computer Interaction), made by Team 06, "Five Forward."
 
-**Demo video:** ADD YOUTUBE LINK HERE
+**Demo video:** <! YOUTUBE !>
 
 ## What you can do in the app
 
