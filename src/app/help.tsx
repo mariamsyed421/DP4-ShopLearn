@@ -1,19 +1,54 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { loadTips, SavedTip } from "../data/tips";
 
+// recorded audio clip
+const tipAudio: Record<string, any> = {
+  search: require("../../assets/audio/tip-search.m4a"),
+  addcart: require("../../assets/audio/tip-addcart.m4a"),
+  checkout: require("../../assets/audio/tip-checkout.m4a"),
+  reorder: require("../../assets/audio/tip-reorder.m4a"),
+};
+
+// Built-in tips
+const builtInTips = [
+  {
+    id: "search",
+    name: "Searching for an item",
+    steps: "1. On Home, tap Search for something new.\n2. Tap the microphone and say what you want, like \"cereal\".\n3. Tap the microphone again when you are done.\n4. Tap View on the item you want.",
+  },
+  {
+    id: "addcart",
+    name: "Adding an item to your cart",
+    steps: "1. Use the - and + buttons to pick how many you want.\n2. Tap Add to cart.\n3. A message at the bottom tells you it was added.",
+  },
+  {
+    id: "checkout",
+    name: "Checking out",
+    steps: "1. Tap Cart at the top of the screen.\n2. Check your items and tap Checkout.\n3. Check your card and address, then tap Confirm.\n4. Tap Yes, place order.",
+  },
+  {
+    id: "reorder",
+    name: "Buying your usual items",
+    steps: "1. On Home, find Your usual items.\n2. Tap Add next to the item you want.\n3. Tap Cart at the top when you are ready to check out.",
+  },
+];
+
 export default function HelpScreen() {
   const insets = useSafeAreaInsets();
   const { from } = useLocalSearchParams<{ from: string }>();
   const [isListening, setIsListening] = useState(false);
-  const [textSize, setTextSize] = useState("medium");
-  const [tips, setTips] = useState<SavedTip[]>([]);
+  const [tips, setTips] = useState<{ id: string; name: string; steps?: string; type?: string }[]>([]);
   const [openTipId, setOpenTipId] = useState("");
   const [answered, setAnswered] = useState(false);
+  const [playingId, setPlayingId] = useState(""); // which tip is playing
+
+  const player = useAudioPlayer(null);
+  const status = useAudioPlayerStatus(player);
 
   let suggestedId = "";
   if (from === "home") suggestedId = "reorder";
@@ -22,38 +57,22 @@ export default function HelpScreen() {
 
   useEffect(() => {
     loadSettings();
+    setAudioModeAsync({ playsInSilentMode: true });
   }, []);
-  /*
-  const perms = async () => {
-    const permRes = await requestRecordingPermissionsAsync();
-    if(!permRes.granted)
-      Alert.alert('Denied')
-    return permRes.granted
-  }
-  const recorder = useAudioRecorder(
-    RecordingPresets.HIGH_QUALITY,
-    (status) => console.log('Recording status: ', status)
-  )
-  const player = useAudioPlayer();
-  function playBack() {
-    if(player.playing)
-      player.pause();
-    else{
-      player.seekTo(0);
-      player.play();
-    }
-  }
-  */
-  async function loadSettings() {
-    const savedPrefs = await AsyncStorage.getItem("preferences");
-    if (savedPrefs) {
-      const data = JSON.parse(savedPrefs);
-      setTextSize(data.textSize || "medium");
-    }
 
-    const savedTips = await loadTips();
-    const suggested = savedTips.filter((tip) => tip.id === suggestedId);
-    const others = savedTips.filter((tip) => tip.id !== suggestedId);
+  // clip ended
+  useEffect(() => {
+    if (status.didJustFinish) setPlayingId("");
+  }, [status.didJustFinish]);
+
+  async function loadSettings() {
+    // recorded tips
+    const savedTips: SavedTip[] = await loadTips();
+    const savedIds = savedTips.map((tip) => tip.id);
+    const allTips = [...savedTips, ...builtInTips.filter((tip) => !savedIds.includes(tip.id))];
+
+    const suggested = allTips.filter((tip) => tip.id === suggestedId);
+    const others = allTips.filter((tip) => tip.id !== suggestedId);
     setTips([...suggested, ...others]);
   }
 
@@ -61,59 +80,97 @@ export default function HelpScreen() {
     if (isListening) {
       setIsListening(false);
       setAnswered(true);
-      setOpenTipId(suggestedId);
+      if (suggestedId !== "") playTip(suggestedId);
     } else {
       setIsListening(true);
       setAnswered(false);
     }
   }
 
+  // open or close a tip. closing it stops the audio
   function toggleTip(id: string) {
-    setOpenTipId(openTipId === id ? "" : id);
+    if (openTipId === id) {
+      if (playingId === id) stopTip();
+      setOpenTipId("");
+    } else {
+      setOpenTipId(id);
+    }
+  }
+
+  function stopTip() {
+    player.pause();
+    setPlayingId("");
+  }
+
+  // play button inside the drop down. tap again: stop
+  function playTip(id: string) {
+    if (playingId === id) {
+      stopTip();
+      return;
+    }
+    setOpenTipId(id);
+    if (tipAudio[id]) {
+      player.replace(tipAudio[id]);
+      player.seekTo(0);
+      player.play();
+      setPlayingId(id);
+    }
   }
 
   return (
     <View className="flex-1 bg-white">
-      {/* Blue header */}
-      <View className="bg-[#99CBF7]" style={{ paddingTop: insets.top }}>
-        <View className="h-20 items-center justify-center">
-          <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))} className="absolute left-4" hitSlop={10}>
-            <Ionicons name="arrow-back-circle-outline" size={48} color="black" />
-          </Pressable>
-          <Text className="font-bold" style={{ fontSize: textSize === "small" ? 27 : textSize === "large" ? 36 : 32 }}>Help</Text>
-        </View>
+      {/* Header */}
+      <View className="px-6" style={{ paddingTop: insets.top + 16 }}>
+        <Pressable
+          onPress={() => router.back()}
+          className="self-start flex-row items-center h-[44px] px-3 rounded-full gap-1 bg-[#DCEFD8]"
+        >
+          <Ionicons name="chevron-back" size={20} color="#173F27" />
+          <Text className="text-[18px] font-bold text-[#173F27]">Back</Text>
+        </Pressable>
+        <Text className="text-[32px] font-bold text-center text-[#173F27] mt-1">Help</Text>
       </View>
 
-      <ScrollView className="flex-1" contentContainerClassName="px-8 pt-6 pb-4">
-        {/* Saved tips */}
-        <Text className="font-bold" style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 30 : 26 }}>Saved tips</Text>
-        <Text className="mt-1 mb-4" style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 21 : 18 }}>
-          {answered && suggestedId !== "" ? "Here is help for this screen. You can also tap any tip." : "Ask me for help, or tap a tip to play it"}
+      <ScrollView className="flex-1" contentContainerClassName="px-6 pt-8 pb-4">
+        {/* Tips */}
+        <Text className="text-[26px] font-bold text-[#173F27]">Saved tips</Text>
+        <Text className="text-[20px] text-[#173F27] mb-4">
+          {answered && suggestedId !== "" ? "Here is help for this screen. You can also tap any tip." : "Tap to play"}
         </Text>
 
-        {tips.length === 0 && (
-          <Text className="mb-4" style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 21 : 18 }}>
-            You have not saved any tips yet. You can add some in Account settings.
-          </Text>
-        )}
-
         {tips.map((tip) => (
-          <View key={tip.id} className="mb-5">
+          <View key={tip.id} className="mb-4">
             <Pressable
               onPress={() => toggleTip(tip.id)}
-              className="flex-row items-center justify-between bg-[#B5DAFC] rounded-xl px-9 py-5"
+              className="flex-row items-center justify-between bg-[#2F7A3A] rounded-2xl px-6 min-h-[72px] py-3"
             >
-              <Text className="font-semibold text-[#333] flex-1 mr-2" style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 21 : 18 }}>{tip.name}</Text>
+              <Text className="flex-1 mr-2 text-[20px] font-bold text-white">{tip.name}</Text>
               <Ionicons
                 name={openTipId === tip.id ? "chevron-down" : "chevron-forward"}
-                size={24}
-                color="black"
+                size={26}
+                color="white"
               />
             </Pressable>
 
             {openTipId === tip.id && (
-              <View className="bg-[#EAF4FE] rounded-xl px-6 py-4 mt-2">
-                <Text style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 21 : 18 }}>
+              <View className="bg-white border-2 border-[#8BC585] rounded-2xl px-5 py-4 mt-2">
+                {/* play button */}
+                {tipAudio[tip.id] && (
+                  <Pressable
+                    onPress={() => playTip(tip.id)}
+                    className="flex-row items-center self-start gap-2 mb-3"
+                  >
+                    <Ionicons
+                      name={playingId === tip.id ? "pause-circle" : "play-circle"}
+                      size={32}
+                      color="#2F7A3A"
+                    />
+                    <Text className="text-[18px] font-bold text-[#173F27]">
+                      {playingId === tip.id ? "Playing... tap to stop" : "Play recorded tip"}
+                    </Text>
+                  </Pressable>
+                )}
+                <Text className="text-[18px] text-[#173F27] leading-[28px]">
                   {tip.steps ? tip.steps : `Playing your ${tip.type} tip: ${tip.name}`}
                 </Text>
               </View>
@@ -124,31 +181,27 @@ export default function HelpScreen() {
         {/* Mascot */}
         <Image
           source={require("../../assets/images/mascot.png")}
-          className="self-center mt-2"
-          style={{ width: 120, height: 150 }}
+          className="self-center mt-4"
+          style={{ width: 150, height: 180 }}
           resizeMode="contain"
         />
       </ScrollView>
 
       {/* Mic button */}
-      <View className="items-center" style={{ paddingBottom: insets.bottom + 24 }}>
-        <Pressable
-          onPress={handleMicPress}
-          className="w-[100px] h-[100px] rounded-full bg-[#F2F2F2] border-2 border-[#BABABA] items-center justify-center"
-          style={{ boxShadow: "0px 6px 4px 0px rgba(95, 95, 95, 0.3)" }}
-        >
+      <View className="items-center pt-2" style={{ paddingBottom: insets.bottom + 24 }}>
+        <Pressable onPress={handleMicPress}>
           <Image
             source={
               isListening
-                ? require("../../assets/images/mic-active.png")
-                : require("../../assets/images/mic-inactive.png")
+                ? require("../../assets/images/mic-green-active.png")
+                : require("../../assets/images/mic-green-inactive.png")
             }
-            style={{ width: 54, height: 54 }}
+            style={{ width: 130, height: 130 }}
             resizeMode="contain"
           />
         </Pressable>
-        <Text className="font-semibold mt-4" style={{ fontSize: textSize === "small" ? 19 : textSize === "large" ? 26 : 22 }}>
-          {isListening ? "I’m listening. Tap when done" : "Tap to speak"}
+        <Text className="text-[24px] font-bold text-[#173F27] mt-3">
+          {isListening ? "I’m listening. Tap when done" : "Ask me for help!"}
         </Text>
       </View>
     </View>

@@ -258,14 +258,7 @@ export default function RecordTipScreen() {
                 {error}
               </Text>
             )}
-            <Pressable onPress={playBack}
-              style={{
-                backgroundColor: "#6AAA50",
-                paddingVertical: 15,
-                borderRadius: 15,
-                alignItems: "center",
-                marginBottom: 12,
-              }}><Text style={{ color: "#fff", fontSize: labelSize, fontWeight: "bold" }}>Play</Text></Pressable>
+            <Pressable onPress={() => player.play()}><Text>Play</Text></Pressable>
             <Pressable
               onPress={handleSave}
               style={{

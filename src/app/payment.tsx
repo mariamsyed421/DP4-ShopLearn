@@ -6,27 +6,20 @@ import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-nativ
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { defaultPayment, Payment } from "../data/payment";
 
-const inputClass =
-  "h-12 bg-[#F1F5FB] border-[1.5px] border-[#5B8FD9] rounded-2xl px-5 py-0 text-[18px]";
+// light green when locked
+function inputClass(editing: boolean) {
+  return editing
+    ? "h-[56px] bg-white border-2 border-[#97CB91] rounded-full px-5 text-[18px] text-[#173F27]"
+    : "h-[56px] bg-[#EEF3ED] border-2 border-[#EEF3ED] rounded-full px-5 text-[18px] text-[#173F27]";
+}
 
 export default function PaymentScreen() {
   const insets = useSafeAreaInsets();
   const [payment, setPayment] = useState<Payment>(defaultPayment);
-  const [textSize, setTextSize] = useState("medium");
+  const [editingCard, setEditingCard] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(false);
 
-  useEffect(() => {
-    loadTextSize();
-  }, []);
-
-  async function loadTextSize() {
-    const saved = await AsyncStorage.getItem("preferences");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setTextSize(data.textSize || "medium");
-    }
-  }
-
-  // Load saved payment info 
+  // Load saved payment info
   useEffect(() => {
     async function load() {
       const saved = await AsyncStorage.getItem("payment");
@@ -47,88 +40,97 @@ export default function PaymentScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      {/* Blue header */}
-      <View className="bg-[#99CBF7]" style={{ paddingTop: insets.top }}>
-        <View className="h-20 items-center justify-center">
-          <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace("/cart"))} className="absolute left-4" hitSlop={10}>
-            <Ionicons name="arrow-back-circle-outline" size={48} color="black" />
-          </Pressable>
-          <Text className="font-bold" style={{ fontSize: textSize === "small" ? 22 : textSize === "large" ? 28 : 26, marginLeft: 40 }}>Payment details</Text>
-        </View>
+      {/* Header */}
+      <View className="flex-row items-center px-6 gap-4 mb-10" style={{ paddingTop: insets.top + 16 }}>
+        <Pressable
+          onPress={() => router.back()}
+          className="flex-row items-center h-[44px] px-3 rounded-full gap-1 bg-[#DCEFD8]"
+        >
+          <Ionicons name="chevron-back" size={20} color="#173F27" />
+          <Text className="text-[18px] font-bold text-[#173F27]">Back</Text>
+        </Pressable>
+        <Text className="text-[28px] font-bold text-[#173F27]">Payment details</Text>
       </View>
 
       <ScrollView
         className="flex-1"
-        contentContainerClassName="px-5 pt-6 pb-6"
+        contentContainerClassName="px-6 pt-8 pb-6"
         automaticallyAdjustKeyboardInsets
       >
         {/* Card holder */}
         <View className="flex-row items-center justify-between mb-2">
-          <Text className="font-semibold" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>Card Holder Name</Text>
-          <MaterialIcons name="edit" size={26} color="black" />
+          <Text className="text-[20px] font-bold text-[#173F27]">Card Holder Name</Text>
+          <Pressable
+            onPress={() => setEditingCard(!editingCard)}
+            className="flex-row items-center h-[40px] px-4 rounded-full gap-1 bg-[#DCEFD8]"
+          >
+            <MaterialIcons name={editingCard ? "check" : "edit"} size={20} color="#173F27" />
+            <Text className="text-[16px] font-bold text-[#173F27]">{editingCard ? "Done" : "Edit"}</Text>
+          </Pressable>
         </View>
         <TextInput
           value={payment.name}
           onChangeText={(text) => update("name", text)}
-          className={inputClass}
-          style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 22 : 18 }}
-          textAlignVertical="center"
+          editable={editingCard}
+          className={inputClass(editingCard)}
         />
 
         {/* Card number */}
-        <Text className="font-semibold mt-4 mb-2" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>Card Number</Text>
+        <Text className="text-[20px] font-bold text-[#173F27] mt-5 mb-2">Card Number</Text>
         <TextInput
           value={payment.cardNumber}
           onChangeText={(text) => update("cardNumber", text)}
           keyboardType="number-pad"
-          className={inputClass}
-          style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 22 : 18 }}
-          textAlignVertical="center"
+          editable={editingCard}
+          className={inputClass(editingCard)}
         />
 
-        {/* Exp date and CVV side by side */}
-        <View className="flex-row gap-5 mt-6">
+        {/* Exp date and CVV */}
+        <View className="flex-row gap-5 mt-5">
           <View className="flex-1">
-            <Text className="font-semibold mb-2" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>Exp. Date</Text>
+            <Text className="text-[20px] font-bold text-[#173F27] mb-2">Exp. Date</Text>
             <TextInput
               value={payment.expDate}
               onChangeText={(text) => update("expDate", text)}
-              className={inputClass}
-              style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 22 : 18 }}
-              textAlignVertical="center"
+              editable={editingCard}
+              className={inputClass(editingCard)}
             />
           </View>
           <View className="flex-1">
-            <Text className="font-semibold mb-2" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>CVV</Text>
+            <Text className="text-[20px] font-bold text-[#173F27] mb-2">CVV</Text>
             <TextInput
               value={payment.cvv}
               onChangeText={(text) => update("cvv", text)}
               keyboardType="number-pad"
               secureTextEntry
-              className={inputClass}
-              style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 22 : 18 }}
-              textAlignVertical="center"
+              editable={editingCard}
+              className={inputClass(editingCard)}
             />
           </View>
         </View>
 
         {/* Delivery address */}
-        <View className="flex-row items-center justify-between mt-16 mb-2">
-          <Text className="font-semibold" style={{ fontSize: textSize === "small" ? 17 : textSize === "large" ? 23 : 20 }}>Delivery Address</Text>
-          <MaterialIcons name="edit" size={26} color="black" />
+        <View className="flex-row items-center justify-between mt-12 mb-2">
+          <Text className="text-[20px] font-bold text-[#173F27]">Delivery Address</Text>
+          <Pressable
+            onPress={() => setEditingAddress(!editingAddress)}
+            className="flex-row items-center h-[40px] px-4 rounded-full gap-1 bg-[#DCEFD8]"
+          >
+            <MaterialIcons name={editingAddress ? "check" : "edit"} size={20} color="#173F27" />
+            <Text className="text-[16px] font-bold text-[#173F27]">{editingAddress ? "Done" : "Edit"}</Text>
+          </Pressable>
         </View>
         <TextInput
           value={payment.address}
           onChangeText={(text) => update("address", text)}
-          className={inputClass}
-          style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 22 : 18 }}
-          textAlignVertical="center"
+          editable={editingAddress}
+          className={inputClass(editingAddress)}
         />
       </ScrollView>
 
       {/* Bottom row */}
       <View
-        className="flex-row items-center justify-between px-5"
+        className="flex-row items-center justify-between px-6"
         style={{ paddingBottom: insets.bottom + 16 }}
       >
         <Pressable onPress={() => router.push({ pathname: "/help", params: { from: "payment" } })} className="items-center">
@@ -137,11 +139,11 @@ export default function PaymentScreen() {
             style={{ width: 80, height: 95 }}
             resizeMode="contain"
           />
-          <Text className="font-semibold" style={{ fontSize: textSize === "small" ? 16 : textSize === "large" ? 21 : 18 }}>Tap for help</Text>
+          <Text className="text-[18px] font-bold text-[#173F27]">Tap for help</Text>
         </Pressable>
 
-        <Pressable onPress={handleConfirm} className="bg-[#4CAA45] px-12 py-2 rounded-full">
-          <Text className="text-white font-semibold" style={{ fontSize: textSize === "small" ? 20 : textSize === "large" ? 28 : 24 }}>Confirm</Text>
+        <Pressable onPress={handleConfirm} className="h-[60px] px-12 rounded-2xl items-center justify-center bg-[#2F7A3A]">
+          <Text className="text-[22px] font-bold text-white">Confirm</Text>
         </Pressable>
       </View>
     </View>

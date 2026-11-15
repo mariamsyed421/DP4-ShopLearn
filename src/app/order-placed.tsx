@@ -1,84 +1,118 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router, useLocalSearchParams } from "expo-router";
-import { Image, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { products } from "../data/products";
 
 export default function OrderPlacedScreen() {
   const insets = useSafeAreaInsets();
-  const { width, height } = useWindowDimensions();
-  const smallPhone = height < 750;
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const product = products.find((p) => p.id === id);
-  const [textSize, setTextSize] = useState("medium");
+  const [cartIds, setCartIds] = useState<string[]>([]);
+  const [total, setTotal] = useState(0);
 
+  // Load the order saved on the confirm screen
   useEffect(() => {
-    loadTextSize();
+    async function load() {
+      const saved = await AsyncStorage.getItem("lastOrder");
+      if (saved) {
+        const order = JSON.parse(saved);
+        setCartIds(order.cartIds);
+        setTotal(order.total);
+      }
+    }
+    load();
   }, []);
 
-  async function loadTextSize() {
-    const saved = await AsyncStorage.getItem("preferences");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setTextSize(data.textSize || "medium");
-    }
-  }
+  const items = products
+    .map((product) => ({
+      product: product,
+      quantity: cartIds.filter((id) => id === product.id).length,
+    }))
+    .filter((item) => item.quantity > 0);
 
-  const bubbleWidth = width + 40;
-  const bubbleHeight = bubbleWidth * (963 / 1398);
-  const tailHeight = bubbleHeight * 0.2;
+  // Delivery estimate
+  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const deliveryDay = tomorrow.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }}>
-      {/* Speech bubble */}
-      <View className="justify-end overflow-hidden" style={{ minHeight: insets.top + 200 }}>
+    <View className="flex-1 bg-white">
+      {/* Heading + mascot */}
+      <View className="flex-1 flex-row items-end px-6" style={{ paddingTop: insets.top + 24, zIndex: 0 }}>
+        <View className="flex-1 mb-24 mr-2">
+          <Text className="text-[32px] font-bold text-center text-[#173F27]">Your order is on its way!</Text>
+        </View>
         <Image
-          source={require("../../assets/images/bubble.png")}
-          style={{ position: "absolute", bottom: 0, left: -20, width: bubbleWidth, height: bubbleHeight }}
-          resizeMode="stretch"
+          source={require("../../assets/images/mascot-thumbsup.png")}
+          style={{ width: 120, height: 160 }}
+          resizeMode="contain"
         />
-        <Text
-          className="font-semibold text-center px-10"
-          style={{ fontSize: textSize === "small" ? 24 : textSize === "large" ? 32 : 28, marginBottom: tailHeight + 30 }}
-          
-        >
-          Your {product ? product.name : "order"} is on its way!
-        </Text>
       </View>
 
-      {/* Mascot */}
-      <Image
-        source={require("../../assets/images/mascot.png")}
-        className="self-center" style={smallPhone ? { width: 150, height: 170 } : { width: 220, height: 240 }}
-        resizeMode="contain"
-      />
-
-      {/* Blue panel */}
+      {/* Green card */}
       <View
-        className="bg-[#99CBF7] px-8 pt-8 justify-between"
-        style={{ flexGrow: 1, paddingBottom: insets.bottom + 24 }}
+        className="rounded-t-[32px] bg-[#8BC585]"
+        style={{ marginTop: -24, zIndex: 1, elevation: 1 }}
       >
-        <View className="flex-row items-center justify-between">
-          {product && (
-            <View className="bg-white rounded-xl p-2">
-              <Image source={product.image} style={smallPhone ? { width: 90, height: 130 } : { width: 120, height: 180 }} resizeMode="contain" />
+        <View className="px-6 pt-10 pb-10">
+          {/* Delivery estimate */}
+          <View className="flex-row items-center bg-white rounded-2xl p-4">
+            <Image
+              source={require("../../assets/images/delivery.png")}
+              style={{ width: 60, height: 76 }}
+              resizeMode="contain"
+            />
+            <View className="flex-1 ml-4">
+              <Text className="text-[18px] font-bold text-[#173F27]">Arriving tomorrow</Text>
+              <Text className="text-[18px] text-[#173F27]">{deliveryDay}</Text>
+              <Text className="text-[18px] text-[#173F27]">Between 2 and 4 PM</Text>
             </View>
-          )}
-          <Image
-            source={require("../../assets/images/delivery.png")}
-            style={smallPhone ? { width: 110, height: 140 } : { width: 140, height: 170 }}
-            resizeMode="contain"
-          />
+          </View>
+
+          {/* Order summary */}
+          <View className="bg-white rounded-2xl p-4 mt-6">
+            <View className="flex-row items-baseline mb-2">
+              <Text className="text-[20px] font-bold text-[#173F27]">Order summary</Text>
+              {items.length > 2 && (
+                <Text className="text-[16px] text-[#173F27] ml-2">(scroll to see more)</Text>
+              )}
+            </View>
+
+            {/* scrolls if more than 2*/}
+            <ScrollView style={{ height: 140 }} nestedScrollEnabled>
+              {items.map((item) => (
+                <View key={item.product.id} className="flex-row items-center py-2">
+                  <Image source={item.product.image} style={{ width: 40, height: 52 }} resizeMode="contain" />
+                  <View className="flex-1 ml-3">
+                    <Text className="text-[18px] font-semibold text-[#173F27]">{item.product.name}</Text>
+                    <Text className="text-[16px] text-[#173F27]">
+                      {item.quantity} x ${item.product.price.toFixed(2)}
+                    </Text>
+                  </View>
+                  <Text className="text-[18px] font-bold text-[#173F27]">
+                    ${(item.product.price * item.quantity).toFixed(2)}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+
+            {/* Total */}
+            <View className="flex-row justify-between border-t-2 border-[#DCEFD8] pt-3 mt-2">
+              <Text className="text-[20px] font-bold text-[#173F27]">Total</Text>
+              <Text className="text-[20px] font-bold text-[#173F27]">${total.toFixed(2)}</Text>
+            </View>
+          </View>
         </View>
 
-        <Pressable
-          onPress={() => router.dismissTo("/home")}
-          className="w-full max-w-[290px] self-center bg-[#4CAA45] py-3 rounded-2xl items-center"
-        >
-          <Text className="text-white font-semibold" style={{ fontSize: textSize === "small" ? 19 : textSize === "large" ? 26 : 22 }}>Back to Home</Text>
-        </Pressable>
+        {/* Back to home */}
+        <View className="items-center px-6" style={{ paddingBottom: insets.bottom + 32 }}>
+          <Pressable
+            onPress={() => router.dismissTo("/home")}
+            className="w-full max-w-[300px] h-[60px] rounded-2xl items-center justify-center bg-[#2F7A3A]"
+          >
+            <Text className="text-[22px] font-bold text-white">Back to Home</Text>
+          </Pressable>
+        </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
