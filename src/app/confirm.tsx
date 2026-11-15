@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import * as Speech from 'expo-speech';
 import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -31,6 +32,17 @@ export default function ConfirmScreen() {
   const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const itemCount = cartIds.length;
   const lastFour = payment.cardNumber.replace(/\s/g, "").slice(-4);
+
+  const readAloud = () => {
+    const details =  items.length === 1 
+      ? `${items[0].quantity} ${items[0].quantity === 1 ? "box" : "boxes"} of ${items[0].product.name}`:
+                `${itemCount} items`;
+    //const cardDetails = `Card ending in ${lastFour}`
+    //const address = `Delivery address: ${payment.address}`
+    const messages = `You are ordering ${details} for $${total.toFixed(2)}. Is that correct?`
+    Speech.speak(messages)
+    //Speech.speak(`${messages}, ${cardDetails}, ${address}`);
+  }
 
   async function handlePlaceOrder() {
     if (items.length === 0) return;
@@ -65,11 +77,13 @@ export default function ConfirmScreen() {
             </Text>
           )}
         </View>
+        <Pressable onPress={readAloud}>
         <Image
           source={require("../../assets/images/mascot-thumbsup.png")}
           style={{ width: 120, height: 160 }}
           resizeMode="contain"
         />
+        </Pressable>
       </View>
 
       {/* Green card */}
