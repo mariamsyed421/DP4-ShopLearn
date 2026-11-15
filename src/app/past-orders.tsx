@@ -37,6 +37,15 @@ export default function PastOrdersScreen() {
     ]);
   }
 
+  // put everything from this order back in the cart, then open the cart
+  async function reorder(order: Order) {
+    const savedCart = await AsyncStorage.getItem("cart");
+    const cart: string[] = savedCart ? JSON.parse(savedCart) : [];
+    const newCart = [...cart, ...order.cartIds];
+    await AsyncStorage.setItem("cart", JSON.stringify(newCart));
+    router.push("/cart");
+  }
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -103,9 +112,19 @@ export default function PastOrdersScreen() {
                   </View>
                 ))}
 
-                {/* Total + cancel */}
-                <View className="flex-row items-center justify-between mt-4">
-                  <Text className="text-[20px] font-bold text-[#173F27]">Total: ${order.total.toFixed(2)}</Text>
+                {/* Total */}
+                <Text className="text-[20px] font-bold text-[#173F27] mt-4">Total: ${order.total.toFixed(2)}</Text>
+
+                {/* Reorder + cancel */}
+                <View className="flex-row items-center justify-between mt-3">
+                  <Pressable
+                    onPress={() => reorder(order)}
+                    accessibilityLabel="Reorder this order"
+                    className="flex-row items-center h-[44px] px-4 rounded-full gap-2 bg-[#2F7A3A]"
+                  >
+                    <Ionicons name="cart-outline" size={22} color="white" />
+                    <Text className="text-[18px] font-bold text-white">Reorder</Text>
+                  </Pressable>
                   <Pressable
                     onPress={() => cancelOrder(index)}
                     className="h-[44px] px-4 rounded-full items-center justify-center bg-white border-2 border-[#E5534B]"

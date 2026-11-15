@@ -14,6 +14,11 @@ export default function HomeScreen() {
   const [cartCount, setCartCount] = useState(0);
   const [toast, setToast] = useState(""); // "Added to cart" message, "" means hidden
 
+  // for our own scroll bar next to the usual items (the phone's one is too thin to see)
+  const [scrollY, setScrollY] = useState(0);
+  const [contentHeight, setContentHeight] = useState(0);
+  const [boxHeight, setBoxHeight] = useState(0);
+
   // cart count update
   useFocusEffect(
     useCallback(() => {
@@ -130,7 +135,16 @@ export default function HomeScreen() {
                   </Text>
                 </View>
               ) : (
-                <ScrollView nestedScrollEnabled showsVerticalScrollIndicator>
+                <View style={{ flex: 1, flexDirection: "row" }}>
+                <ScrollView
+                  style={{ flex: 1 }}
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator={false}
+                  scrollEventThrottle={16}
+                  onScroll={(e) => setScrollY(e.nativeEvent.contentOffset.y)}
+                  onContentSizeChange={(w, h) => setContentHeight(h)}
+                  onLayout={(e) => setBoxHeight(e.nativeEvent.layout.height)}
+                >
                   <View className="gap-3">
                     {usualProducts.map((item) => {
                       // maybe go back and change name
@@ -161,15 +175,43 @@ export default function HomeScreen() {
                           <Pressable
                             onPress={() => addToCart(item.id, title)}
                             accessibilityLabel={`Add ${title} to cart`}
-                            className="h-[44px] px-4 rounded-full items-center justify-center bg-[#2F7A3A] ml-3"
+                            className="h-[44px] px-3 rounded-full items-center justify-center bg-[#2F7A3A] ml-3"
                           >
-                            <Text className="text-[18px] font-bold text-white">Add</Text>
+                            <View className="flex-row items-center gap-2">
+                              <Ionicons name="cart-outline" size={22} color="white" />
+                              <Text className="text-[18px] font-bold text-white">Add</Text>
+                            </View>
                           </Pressable>
                         </Pressable>
                       );
                     })}
                   </View>
                 </ScrollView>
+
+                {/* Our own scroll bar: a light track with a dark green thumb */}
+                {contentHeight > boxHeight && boxHeight > 0 && (
+                  <View
+                    style={{
+                      width: 10,
+                      marginLeft: 8,
+                      borderRadius: 5,
+                      backgroundColor: "#DCEFD8",
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 10,
+                        borderRadius: 5,
+                        backgroundColor: "#2F7A3A",
+                        height: Math.max(40, (boxHeight / contentHeight) * boxHeight),
+                        marginTop:
+                          (scrollY / (contentHeight - boxHeight)) *
+                          (boxHeight - Math.max(40, (boxHeight / contentHeight) * boxHeight)),
+                      }}
+                    />
+                  </View>
+                )}
+              </View>
               )}
             </View>
           </View>

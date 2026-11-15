@@ -1,9 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
-import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import {
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+  useAudioPlayer,
+  useAudioPlayerStatus,
+  useAudioRecorder,
+} from "expo-audio";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { sendRecording } from "../api/speech_text";
 import { loadTips, SavedTip } from "../data/tips";
 
 // recorded audio clip
@@ -38,6 +46,33 @@ const builtInTips = [
   },
 ];
 
+// Words that point to each tip. Whichever tip has the most matching words wins.
+const tipWords: Record<string, string[]> = {
+  checkout: ["checkout", "check out", "pay", "payment", "place order", "place my order", "confirm"],
+  addcart: ["add to cart", "add to my cart", "add an item", "adding", "add", "quantity"],
+  search: ["search", "find", "look for", "looking for"],
+  reorder: ["usual", "reorder", "re-order", "again", "favorite", "regular"],
+};
+
+// Questions that do not have a recorded tip, but we still know the answer
+const otherAnswers = [
+  {
+    title: "Signing out",
+    words: ["sign out", "log out", "logout"],
+    answer: "On Home, tap Sign out at the bottom. Then tap Sign out again to confirm.",
+  },
+  {
+    title: "Past orders",
+    words: ["past order", "old order", "previous order", "cancel"],
+    answer: "On Home, tap Orders at the top left. There you can tap Reorder to buy the same things again, or Cancel to cancel an order.",
+  },
+  {
+    title: "Changing the text size",
+    words: ["text size", "bigger", "larger", "font", "too small"],
+    answer: "On Home, tap Account settings. Tap Preferences, then pick the text size you like.",
+  },
+];
+
 export default function HelpScreen() {
   const insets = useSafeAreaInsets();
   const { from } = useLocalSearchParams<{ from: string }>();
@@ -46,6 +81,11 @@ export default function HelpScreen() {
   const [openTipId, setOpenTipId] = useState("");
   const [answered, setAnswered] = useState(false);
   const [playingId, setPlayingId] = useState(""); // which tip is playing
+  const [matchedId, setMatchedId] = useState(""); // the tip we found for what the person asked
+  const [helpMessage, setHelpMessage] = useState(""); // what the mascot tells the person
+  const [otherAnswer, setOtherAnswer] = useState<{ title: string; answer: string } | null>(null);
+
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
 
   const player = useAudioPlayer(null);
   const status = useAudioPlayerStatus(player);
@@ -76,15 +116,102 @@ export default function HelpScreen() {
     setTips([...suggested, ...others]);
   }
 
-  function handleMicPress() {
-    if (isListening) {
-      setIsListening(false);
-      setAnswered(true);
-      if (suggestedId !== "") playTip(suggestedId);
-    } else {
+  async function handleMicPress() {
+    if (!isListening) {
+      // start recording
+      const permission = await requestRecordingPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert("Microphone is off", "Please allow the microphone, or tap a tip below.");
+        return;
+      }
+      stopTip();
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+      await recorder.prepareToRecordAsync();
+      recorder.record();
       setIsListening(true);
       setAnswered(false);
+      setHelpMessage("");
+      setOtherAnswer(null);
+      setMatchedId("");
+    } else {
+      // stop recording and find out what was said
+      setIsListening(false);
+      setHelpMessage("One moment...");
+      await recorder.stop();
+      await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+
+      let heard = "";
+      try {
+        heard = (await sendRecording(recorder.uri!)) || "";
+      } catch (e) {
+        heard = "";
+      }
+      answerQuestion(heard.toLowerCase());
     }
+  }
+
+  // Look at the words that were said and show the right tip
+  function answerQuestion(words: string) {
+    setAnswered(true);
+
+    // nothing heard: help for the screen they came from, or ask again
+    if (words.trim() === "") {
+      if (suggestedId !== "") {
+        setHelpMessage("I did not hear you clearly, so here is help for the screen you were on.");
+        showTip(suggestedId);
+      } else {
+        setHelpMessage("Sorry, I did not catch that. Tap the microphone and try again.");
+      }
+      return;
+    }
+
+    // 1. one of the tips?
+    let bestId = "";
+    let bestScore = 0;
+    for (const tip of tips) {
+      let score = 0;
+      for (const word of tipWords[tip.id] || []) {
+        if (words.includes(word)) score = score + 1;
+      }
+      // tips people recorded themselves: match words in the tip name
+      for (const word of tip.name.toLowerCase().split(" ")) {
+        if (word.length > 4 && words.includes(word)) score = score + 1;
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        bestId = tip.id;
+      }
+    }
+
+    if (bestId !== "") {
+      const tip = tips.find((t) => t.id === bestId);
+      if (tip && tipAudio[bestId]) {
+        setHelpMessage(`Here is the tip for: ${tip.name}`);
+      } else if (tip) {
+        setHelpMessage("A tip is not recorded for that yet, but the answer is:");
+      }
+      showTip(bestId);
+      return;
+    }
+
+    // 2. a question we know the answer to, but there is no recorded tip
+    for (const other of otherAnswers) {
+      if (other.words.some((word) => words.includes(word))) {
+        setHelpMessage("A tip is not recorded for that yet, but the answer is:");
+        setOtherAnswer({ title: other.title, answer: other.answer });
+        return;
+      }
+    }
+
+    // 3. no answer at all
+    setHelpMessage("A tip is not recorded for that, and I do not have an answer yet. You can tap any tip below.");
+  }
+
+  // Pick a tip: move it to the top, open it, highlight it and play it
+  function showTip(id: string) {
+    setMatchedId(id);
+    stopTip();
+    playTip(id);
   }
 
   // open or close a tip. closing it stops the audio
@@ -121,28 +248,48 @@ export default function HelpScreen() {
     <View className="flex-1 bg-white">
       {/* Header */}
       <View className="px-6" style={{ paddingTop: insets.top + 16 }}>
-        <Pressable
-          onPress={() => router.back()}
-          className="self-start flex-row items-center h-[44px] px-3 rounded-full gap-1 bg-[#DCEFD8]"
-        >
-          <Ionicons name="chevron-back" size={20} color="#173F27" />
-          <Text className="text-[18px] font-bold text-[#173F27]">Back</Text>
-        </Pressable>
-        <Text className="text-[32px] font-bold text-center text-[#173F27] mt-1">Help</Text>
+        <View className="flex-row items-center justify-between">
+          <Pressable
+            onPress={() => router.back()}
+            className="flex-row items-center h-[44px] px-3 rounded-full gap-1 bg-[#DCEFD8]"
+          >
+            <Ionicons name="chevron-back" size={20} color="#173F27" />
+            <Text className="text-[18px] font-bold text-[#173F27]">Back</Text>
+          </Pressable>
+          {/* Small mascot on top */}
+          <Image
+            source={require("../../assets/images/mascot.png")}
+            style={{ width: 70, height: 84 }}
+            resizeMode="contain"
+          />
+        </View>
+        <Text className="text-[32px] font-bold text-center text-[#173F27] -mt-2">Help</Text>
       </View>
 
       <ScrollView className="flex-1" contentContainerClassName="px-6 pt-8 pb-4">
         {/* Tips */}
         <Text className="text-[26px] font-bold text-[#173F27]">Saved tips</Text>
-        <Text className="text-[20px] text-[#173F27] mb-4">
-          {answered && suggestedId !== "" ? "Here is help for this screen. You can also tap any tip." : "Tap to play"}
+        <Text className="text-[20px] font-semibold text-[#173F27] mb-4">
+          {helpMessage !== "" ? helpMessage : "Tap a tip to play it, or tap the microphone and ask me."}
         </Text>
 
-        {tips.map((tip) => (
+        {/* An answer that does not have a recorded tip */}
+        {otherAnswer && (
+          <View className="bg-[#DCEFD8] border-2 border-[#F2C94C] rounded-2xl px-5 py-4 mb-4">
+            <Text className="text-[20px] font-bold text-[#173F27] mb-1">{otherAnswer.title}</Text>
+            <Text className="text-[18px] text-[#173F27] leading-[28px]">{otherAnswer.answer}</Text>
+          </View>
+        )}
+
+        {[...tips]
+          .sort((a, b) => (b.id === matchedId ? 1 : 0) - (a.id === matchedId ? 1 : 0))
+          .map((tip) => (
           <View key={tip.id} className="mb-4">
             <Pressable
               onPress={() => toggleTip(tip.id)}
-              className="flex-row items-center justify-between bg-[#2F7A3A] rounded-2xl px-6 min-h-[72px] py-3"
+              className={`flex-row items-center justify-between rounded-2xl px-6 min-h-[72px] py-3 border-4 ${
+                openTipId === tip.id ? "bg-[#173F27] border-[#F2C94C]" : "bg-[#2F7A3A] border-[#2F7A3A]"
+              }`}
             >
               <Text className="flex-1 mr-2 text-[20px] font-bold text-white">{tip.name}</Text>
               <Ionicons
@@ -171,20 +318,13 @@ export default function HelpScreen() {
                   </Pressable>
                 )}
                 <Text className="text-[18px] text-[#173F27] leading-[28px]">
-                  {tip.steps ? tip.steps : `Playing your ${tip.type} tip: ${tip.name}`}
+                  {tip.steps ? tip.steps : "This tip does not have a recording yet."}
                 </Text>
               </View>
             )}
           </View>
         ))}
 
-        {/* Mascot */}
-        <Image
-          source={require("../../assets/images/mascot.png")}
-          className="self-center mt-4"
-          style={{ width: 150, height: 180 }}
-          resizeMode="contain"
-        />
       </ScrollView>
 
       {/* Mic button */}
