@@ -51,13 +51,11 @@ export default function SetupCompleteScreen() {
               paddingTop: 30,
             }}
           >
-            <Text style={{ fontSize: titleSize, fontWeight: "bold", textAlign: "center" }}>
+            <Text style={{ fontSize: titleSize, fontWeight: "bold", textAlign: "center", color: "#173F27" }}>
               Set up is complete!
             </Text>
 
-            <Text style={{ fontSize: titleSize, fontWeight: "bold", textAlign: "center" }}>
-              all set
-            </Text>
+            
           </View>
 
           <View
@@ -80,28 +78,36 @@ export default function SetupCompleteScreen() {
           <View
             style={{
               flex: 1,
-              backgroundColor: "#A9C7F2",
+              backgroundColor: "#ffffff",
               paddingHorizontal: 30,
               paddingTop: 30,
               minHeight: 300,
             }}
           >
-            <Text style={{ fontSize: lineSize, fontWeight: "600", marginBottom: 14 }}>
+            <View
+              style={{
+                backgroundColor: "#DCEFD8",
+                borderRadius: 12,
+                paddingHorizontal: 15,
+                paddingVertical: 20,
+              }}
+            >
+            <Text style={{ fontSize: lineSize, fontWeight: "600", marginBottom: 14, color: "#173F27" }}>
               ✓ Account created
             </Text>
 
-            <Text style={{ fontSize: lineSize, fontWeight: "600", marginBottom: 14 }}>
-              {prefsDone ? "✓ Preferences set" : "• Preferences: using default settings"}
+            <Text style={{ fontSize: lineSize, fontWeight: "600", marginBottom: 14, color: "#173F27" }}>
+              {prefsDone ? "✓ Preferences set" : " ✓ Preferences set"}
             </Text>
 
-            <Text style={{ fontSize: lineSize, fontWeight: "600", marginBottom: 14 }}>
-              {usualDone ? "✓ Usual items set" : "• Usual items: using all items"}
+            <Text style={{ fontSize: lineSize, fontWeight: "600", marginBottom: 14, color: "#173F27" }}>
+              {usualDone ? "✓ Usual items set" : " ✓ Prefered items set"}
             </Text>
 
-            <Text style={{ fontSize: lineSize, fontWeight: "600" }}>
-              {tipsDone ? "✓ Tips set" : "• Tips: using default tips"}
+            <Text style={{ fontSize: lineSize, fontWeight: "600", color: "#173F27"}}>
+              {tipsDone ? "✓ Tips set" : " ✓ Tips set"}
             </Text>
-
+          </View>
             <View
               style={{
                 marginTop: 40,
@@ -111,7 +117,7 @@ export default function SetupCompleteScreen() {
               <Pressable
                 onPress={goHome}
                 style={{
-                  backgroundColor: "#6AAA50",
+                  backgroundColor: "#2F7A3A",
                   paddingVertical: 15,
                   borderRadius: 15,
                   alignItems: "center",
