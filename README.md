@@ -70,7 +70,7 @@ All the products are made up and stored in the app, so nothing real is ever boug
 - **Ayesha and Aamena:** redesigned the account setup pages (the complex task)
 - **Mariam:** redesigned the simple and moderate task pages
 - **Divya:** speech-to-text and text-to-speech
-- **Zaid and Ammarah:** merged everyone's code, fixed conflicts, and added the Help page, reorder, and read-aloud order summary
+- **Ammarah:** merged everyone's code, fixed conflicts, and added the Help page, reorder, and read-aloud order summary
 
 ## Team
 
