@@ -350,85 +350,40 @@ export default function PreferencesScreen() {
             style={{
               flexDirection: "row",
               marginTop: 12,
+              borderWidth: 2,
+              borderColor: "#173F27",
+              borderRadius: 25,
+              overflow: "hidden",
             }}
           >
-            <Pressable
-              onPress={() => setVoiceSpeed("slow")}
-              style={{
-                flex: 1,
-                paddingVertical: 10,
-                borderWidth: 2,
-                borderColor: "#173F27",
-                alignItems: "center",
-                marginLeft: 0,
-                borderTopLeftRadius: 25,
-                borderBottomLeftRadius: 25,
-                borderTopRightRadius: 0,
-                borderBottomRightRadius: 0,
-                backgroundColor: voiceSpeed === "slow" ? "#DCEFD8" : "#fff",
-              }}
-            >
-              <Text
+            {[
+              { key: "slow", label: "Slow" },
+              { key: "normal", label: "Normal" },
+              { key: "fast", label: "Fast" },
+            ].map((option, index) => (
+              <Pressable
+                key={option.key}
+                onPress={() => setVoiceSpeed(option.key)}
                 style={{
-                  fontSize: normalSize,
-                  color: "#173F27",
-                  fontWeight: "600",
+                  flex: 1,
+                  paddingVertical: 10,
+                  alignItems: "center",
+                  borderLeftWidth: index === 0 ? 0 : 2,
+                  borderLeftColor: "#173F27",
+                  backgroundColor: voiceSpeed === option.key ? "#DCEFD8" : "#fff",
                 }}
               >
-                Slow
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => setVoiceSpeed("normal")}
-              style={{
-                flex: 1,
-                paddingVertical: 10,
-                borderWidth: 2,
-                borderColor: "#173F27",
-                alignItems: "center",
-                marginLeft: -2,
-                borderRadius: 0,
-                backgroundColor: voiceSpeed === "normal" ? "#DCEFD8" : "#fff",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: normalSize,
-                  color: "#173F27",
-                  fontWeight: "600",
-                }}
-              >
-                Normal
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => setVoiceSpeed("fast")}
-              style={{
-                flex: 1,
-                paddingVertical: 10,
-                borderWidth: 2,
-                borderColor: "#173F27",
-                alignItems: "center",
-                marginLeft: -2,
-                borderTopLeftRadius: 0,
-                borderBottomLeftRadius: 0,
-                borderTopRightRadius: 25,
-                borderBottomRightRadius: 25,
-                backgroundColor: voiceSpeed === "fast" ? "#DCEFD8" : "#fff",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: normalSize,
-                  color: "#173F27",
-                  fontWeight: "600",
-                }}
-              >
-                Fast
-              </Text>
-            </Pressable>
+                <Text
+                  style={{
+                    fontSize: normalSize,
+                    color: "#173F27",
+                    fontWeight: "600",
+                  }}
+                >
+                  {option.label}
+                </Text>
+              </Pressable>
+            ))}
           </View>
 
           <Pressable
