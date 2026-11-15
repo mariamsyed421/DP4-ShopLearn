@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,7 +23,27 @@ export default function HelpScreen() {
   useEffect(() => {
     loadSettings();
   }, []);
-
+  /*
+  const perms = async () => {
+    const permRes = await requestRecordingPermissionsAsync();
+    if(!permRes.granted)
+      Alert.alert('Denied')
+    return permRes.granted
+  }
+  const recorder = useAudioRecorder(
+    RecordingPresets.HIGH_QUALITY,
+    (status) => console.log('Recording status: ', status)
+  )
+  const player = useAudioPlayer();
+  function playBack() {
+    if(player.playing)
+      player.pause();
+    else{
+      player.seekTo(0);
+      player.play();
+    }
+  }
+  */
   async function loadSettings() {
     const savedPrefs = await AsyncStorage.getItem("preferences");
     if (savedPrefs) {
