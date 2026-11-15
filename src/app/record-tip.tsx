@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioPlayer, useAudioRecorder } from 'expo-audio';
+import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus, useAudioRecorder } from 'expo-audio';
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
@@ -16,6 +16,7 @@ export default function RecordTipScreen() {
   const [name, setName] = useState("");
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
+  const [recordedUri, setRecordedUri] = useState(""); // the recording we just made
 
   const perms = async () => {
     const permRes = await requestRecordingPermissionsAsync();
@@ -27,13 +28,19 @@ export default function RecordTipScreen() {
     RecordingPresets.HIGH_QUALITY,
     (status) => console.log('Recording status: ', status)
   )
-  const player = useAudioPlayer("file:///var/mobile/Containers/Data/Application/4CF30DC3-6A4D-459A-89E4-25D46D88EA98/Library/Caches/ExpoAudio/recording-C4A18D57-77FF-4175-AACB-5F90E674E2D0.m4a");
-  function playBack() {
-    if(player.playing)
+  // Plays back the recording we just made
+  const player = useAudioPlayer(null);
+  const playerState = useAudioPlayerStatus(player);
+  async function playBack() {
+    if (playerState.playing) {
       player.pause();
-    else{
-      player.play();
+      return;
     }
+    // makes sure the sound comes out loud
+    await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+    player.replace(recordedUri);
+    player.seekTo(0);
+    player.play();
   }
   const startRec = async () => {
     await recorder.prepareToRecordAsync();
@@ -74,14 +81,23 @@ export default function RecordTipScreen() {
       }
     } else {
       await recorder.stop();
+      setRecordedUri(recorder.uri || "");
       setStatus("done");
     }
     setError("");
   }
 
-  function handleRecordAgain() {
-    setStatus("recording");
+  // starts a brand new recording
+  async function handleRecordAgain() {
+    player.pause();
     setError("");
+    await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+    const result = await perms();
+    if (result) {
+      await startRec();
+      setRecordedUri("");
+      setStatus("recording");
+    }
   }
 
   async function handleSave() {
@@ -136,7 +152,7 @@ export default function RecordTipScreen() {
       <View style={{ flex: 1 }}>
         <View
           style={{
-            backgroundColor: "#A9C7F2",
+            backgroundColor: "#FFFFFF",
             paddingHorizontal: 18,
             paddingVertical: 12,
             flexDirection: "row",
@@ -144,21 +160,23 @@ export default function RecordTipScreen() {
           }}
         >
           <Pressable
-            onPress={() => (router.canGoBack() ? router.back() : router.replace("/edit-tips"))}
+             onPress={() => router.back()}
             style={{
-              width: 48,
-              height: 48,
-              borderRadius: 30,
-              borderWidth: 2,
-              borderColor: "black",
-              alignItems: "center",
-              justifyContent: "center",
+               backgroundColor: "#DCEFD9",
+               paddingHorizontal: 16,
+               paddingVertical: 5,
+               borderRadius: 25,
+               alignItems: "center",
+               justifyContent: "center",
             }}
           >
-            <Text style={{ fontSize: 30 }}>←</Text>
+             <Text style={{ color: "#173F27" }}>
+              <Text style={{ fontSize: 24, fontWeight: "bold" }}>‹</Text>
+              <Text style={{ fontSize: 18, fontWeight: "bold" }}> Back</Text>
+            </Text>
           </Pressable>
 
-          <Text style={{ fontSize: titleSize, fontWeight: "bold", marginLeft: 10 }}>
+          <Text style={{ fontSize: titleSize, fontWeight: "bold", marginLeft: 10, color: "#173F27" }}>
             {isVideo ? "Record Video" : "Record Audio"}
           </Text>
         </View>
@@ -191,7 +209,7 @@ export default function RecordTipScreen() {
                 <MaterialCommunityIcons
                   name="video"
                   size={64}
-                  color={status === "recording" ? "#C0392B" : "#7A7A7A"}
+                  color={status === "recording" ? "#C0392B" : "#2F7A3A"}
                 />
               ) : (
                 <Image
@@ -200,19 +218,19 @@ export default function RecordTipScreen() {
                       ? require("../../assets/images/mic-active.png")
                       : require("../../assets/images/mic-inactive.png")
                   }
-                  style={{ width: 64, height: 64 }}
+                  style={{ width: 64, height: 64, tintColor: "#2F7A3A" }}
                   resizeMode="contain"
                 />
               )}
             </View>
 
-            <Text style={{ fontSize: normalSize, fontWeight: "600", marginTop: 14 }}>
+            <Text style={{ fontSize: nameSize, fontWeight: "600", marginTop: 14, color: "#173F27" }}>
               {message}
             </Text>
           </Pressable>
 
           <View style={{ alignItems: "center", marginVertical: 30 }}>
-            <Text style={{ fontSize: nameSize, fontWeight: "bold" }}>Tip name:</Text>
+            <Text style={{ fontSize: nameSize, fontWeight: "bold", color: "#173F27" }}>Tip name:</Text>
 
             <TextInput
               value={name}
@@ -244,11 +262,36 @@ export default function RecordTipScreen() {
                 {error}
               </Text>
             )}
-            <Pressable onPress={() => player.play()}><Text>Play</Text></Pressable>
+            {/* Play back the recording */}
+            {status === "done" && recordedUri !== "" && (
+              <Pressable
+                onPress={playBack}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#DCEFD8",
+                  borderWidth: 2,
+                  borderColor: "#2F7A3A",
+                  paddingVertical: 14,
+                  borderRadius: 15,
+                  marginBottom: 12,
+                }}
+              >
+                <MaterialCommunityIcons
+                  name={playerState.playing ? "pause-circle" : "play-circle"}
+                  size={34}
+                  color="#2F7A3A"
+                />
+                <Text style={{ color: "#173F27", fontSize: labelSize, fontWeight: "bold", marginLeft: 10 }}>
+                  {playerState.playing ? "Tap to stop" : "Play my recording"}
+                </Text>
+              </Pressable>
+            )}
             <Pressable
               onPress={handleSave}
               style={{
-                backgroundColor: "#6AAA50",
+                backgroundColor: "#2F7A3A",
                 paddingVertical: 15,
                 borderRadius: 15,
                 alignItems: "center",
@@ -265,13 +308,13 @@ export default function RecordTipScreen() {
               onPress={handleRecordAgain}
               style={{
                 borderWidth: 2,
-                borderColor: "#6AAA50",
+                borderColor: "#2F7A3A",
                 paddingVertical: 13,
                 borderRadius: 15,
                 alignItems: "center",
               }}
             >
-              <Text style={{ color: "#5C9F4B", fontSize: labelSize, fontWeight: "bold" }}>
+              <Text style={{ color: "#2F7A3A", fontSize: labelSize, fontWeight: "bold" }}>
                 Record again
               </Text>
             </Pressable>

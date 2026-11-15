@@ -29,8 +29,12 @@ const categoryProducts = products.filter(
     (product) => product.category === category
   ); 
 
+// in the summary, keep items grouped by category (Grocery, Household, Health, Other)
+const categoryOrder = ["grocery", "household", "health", "other"];
 const visibleProducts = showSummary
-    ? products.filter((product) => picked.includes(product.id))
+    ? products
+        .filter((product) => picked.includes(product.id))
+        .sort((a, b) => categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category))
     : categoryProducts;
 
 
@@ -100,7 +104,7 @@ const visibleProducts = showSummary
             marginTop: 14,
           }}
         >
-          {showSummary ? "Your usual items" : "Add usual items"}
+          {showSummary ? "Your usual items" : `Add ${categoryNames[category] || ""} items`}
         </Text>
       
         <View
@@ -144,12 +148,29 @@ const visibleProducts = showSummary
           </Text>
         )}
 
-        {visibleProducts.map((item) => {
+        {visibleProducts.map((item, index) => {
           const checked = picked.includes(item.id);
 
+          // in the summary, show a heading (like Grocery) above the first item of each category
+          const showHeading =
+            showSummary && (index === 0 || visibleProducts[index - 1].category !== item.category);
+
           return (
+            <View key={item.id}>
+              {showHeading && (
+                <Text
+                  style={{
+                    fontSize: normalSize + 4,
+                    fontWeight: "bold",
+                    color: colors.heading,
+                    marginTop: index === 0 ? 0 : 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  {categoryNames[item.category] || item.category}
+                </Text>
+              )}
             <Pressable
-              key={item.id}
               disabled={showSummary}
               onPress={() => toggleItem(item.id)}
               accessibilityRole={showSummary ? undefined : "checkbox"}
@@ -217,6 +238,7 @@ const visibleProducts = showSummary
                 </View>
               </View>
             </Pressable>
+            </View>
           );
         })}
       </ScrollView>
