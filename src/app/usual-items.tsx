@@ -1,9 +1,19 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+
+const colors = {
+  heading: "#173F27",
+  card: "#97CB91",
+  back: "#DCEFD8",
+  button: "#2F7A3A",
+
+};
+
 
 const categories = [
   { id: "grocery", label: "Grocery", icon: "food-apple-outline" },
@@ -29,57 +39,79 @@ export default function UsualItemsScreen() {
 
   const titleSize = textSize === "small" ? 25 : textSize === "large" ? 32 : 28;
   const labelSize = textSize === "small" ? 18 : textSize === "large" ? 24 : 20;
+  const descriptionSize = textSize === "small" ? 16 : textSize === "large" ? 20 : 18;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={{ flex: 1 }}>
-        <View
-          style={{
-            backgroundColor: "#A9C7F2",
-            paddingHorizontal: 18,
-            paddingVertical: 12,
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          <Pressable
-            onPress={() => (router.canGoBack() ? router.back() : router.replace("/account-setup"))}
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 30,
-              borderWidth: 2,
-              borderColor: "black",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ fontSize: 30 }}>←</Text>
-          </Pressable>
+        <View style={{ paddingHorizontal: 18, paddingTop: 8 }}>
 
-          <Text style={{ fontSize: titleSize, fontWeight: "bold", marginLeft: 10 }}>
-            Add usual items
-          </Text>
-        </View>
+        <Pressable
+  onPress={() =>
+    router.canGoBack() ? router.back() : router.replace("/account-setup")
+  }
+  style={{
+    alignSelf: "flex-start",
+    backgroundColor: colors.back,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  }}
+>
+  <Text style={{ color: colors.heading, fontWeight: "bold" }}>
+    ‹ Back
+  </Text>
+</Pressable>
 
-        <View style={{ flex: 1, paddingHorizontal: 30, paddingTop: 30 }}>
-          {categories.map((category) => (
-            <Pressable
-              key={category.id}
-              onPress={() =>
-                router.push({ pathname: "/pick-items", params: { category: category.id } })
-              }
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "#BFD8F8",
-                borderRadius: 15,
-                paddingVertical: 18,
-                paddingHorizontal: 20,
-                marginBottom: 14,
-              }}
-            >
-              <MaterialCommunityIcons name={category.icon} size={34} color="#3B5FC0" />
+<Text
+  style={{
+    fontSize: titleSize,
+    fontWeight: "bold",
+    color: colors.heading,
+    textAlign: "center",
+    marginTop: 14,
+  }}
+>
+  Add usual items
+</Text>
+
+<Text
+  style={{
+    fontSize: descriptionSize,
+    color: colors.button,
+    textAlign: "center",
+    marginTop: 16,
+  }}
+>
+  Choose a category to add{"\n"}your favorite items.
+</Text>
+</View>
+
+<View style={{ flex: 1, paddingHorizontal: 30, paddingTop: 30 }}>
+  {categories.map((category) => (
+    <Pressable
+      key={category.id}
+      onPress={() =>
+        router.push({
+          pathname: "/pick-items",
+          params: { category: category.id },
+        })
+    } 
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.card,
+      borderRadius: 15,
+      paddingVertical: 18,
+      paddingHorizontal: 20,
+      marginBottom: 14,
+    }}
+  >
+    <MaterialCommunityIcons
+                name={category.icon}
+                size={34}
+                color={colors.heading}
+              />
 
               <Text
                 style={{
@@ -87,22 +119,28 @@ export default function UsualItemsScreen() {
                   textAlign: "center",
                   fontSize: labelSize,
                   fontWeight: "bold",
-                  color: "#4B4B4B",
+                  color: colors.heading,
                 }}
               >
                 {category.label}
               </Text>
 
-              <MaterialCommunityIcons name="chevron-right" size={30} color="black" />
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={30}
+                color={colors.heading}
+              />
             </Pressable>
           ))}
         </View>
 
         <View style={{ paddingHorizontal: 30, paddingBottom: 30 }}>
           <Pressable
-            onPress={() => (router.canGoBack() ? router.back() : router.replace("/account-setup"))}
+            onPress={() =>
+              router.canGoBack() ? router.back() : router.replace("/account-setup")
+            }
             style={{
-              backgroundColor: "#6AAA50",
+              backgroundColor: colors.button,
               paddingVertical: 15,
               borderRadius: 15,
               alignItems: "center",
