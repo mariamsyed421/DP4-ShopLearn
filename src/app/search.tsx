@@ -1,20 +1,42 @@
 import { Ionicons } from "@expo/vector-icons";
+import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder } from "expo-audio";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { sendRecording } from "../api/speech_text";
 import { products } from "../data/products";
 
 // statuses
-type Status = "idle" | "listening" | "searching" | "results";
+type Status = "idle" | "listening" | "searching" | "results" | "notHeard" | "noResults";
 
 // heading text for each state
 const headingText: Record<Status, string> = {
   idle: "What are you looking for today?",
   listening: "I’m listening",
   searching: "Searching...",
-  results: "Here are a few choices based on what you usually buy",
+  results: "Here's what I found",
+  notHeard: "Sorry, I didn't catch that",
+  noResults: "I couldn't find that",
 };
+
+// ignore filler words
+const skipWords = ["the", "and", "for", "some", "want", "need", "can", "you", "find", "get", "please", "looking"];
+
+// products that match any word they said/typed
+function findMatches(text: string) {
+  const words = text
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, " ") // drop punctuation
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !skipWords.includes(w))
+    .map((w) => (w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w)); // drop plural
+
+  return products.filter((p) => {
+    const info = `${p.name} ${p.category} ${p.title}`.toLowerCase();
+    return words.some((w) => info.includes(w));
+  });
+}
 
 export default function SearchScreen() {
   const insets = useSafeAreaInsets();
@@ -22,28 +44,69 @@ export default function SearchScreen() {
   const [typing, setTyping] = useState(false);
   const [query, setQuery] = useState("");
 
-  // show searching for 1.5 seconds
-  function showResults() {
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+
+  // show searching then results or no results
+  function showResults(text: string) {
+    setQuery(text);
     setStatus("searching");
-    setTimeout(() => setStatus("results"), 1500);
+    setTimeout(() => {
+      setStatus(findMatches(text).length > 0 ? "results" : "noResults");
+    }, 1500);
+  }
+
+  async function startListening() {
+    const permission = await requestRecordingPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Microphone is off", "You can type what you're looking for instead.");
+      setTyping(true);
+      return;
+    }
+    await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+    await recorder.prepareToRecordAsync();
+    recorder.record();
+    setStatus("listening");
+  }
+
+  async function stopListening() {
+    setStatus("searching");
+    await recorder.stop();
+    //  recording mode off
+    await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+
+    // send to ElevenLabs
+    try {
+      const heard = await sendRecording(recorder.uri!);
+      if (!heard || heard.trim() === "") {
+        setStatus("notHeard");
+        return;
+      }
+      setQuery(heard);
+      setStatus(findMatches(heard).length > 0 ? "results" : "noResults");
+    } catch {
+      setStatus("notHeard");
+    }
+  }
+
+  async function cancelListening() {
+    await recorder.stop();
+    await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+    setStatus("idle");
   }
 
   function handleMicPress() {
-    if (status === "idle") setStatus("listening");
-    else if (status === "listening") showResults();
+    if (status === "listening") stopListening();
+    else startListening();
   }
 
   function handleTypedSearch() {
     if (query.trim() === "") return;
     setTyping(false);
-    showResults();
+    showResults(query);
   }
 
   // 3 closest matches
-  const matches = products.filter((p) =>
-    p.name.toLowerCase().includes(query.trim().toLowerCase())
-  );
-  const shownProducts = (matches.length > 0 ? matches : products).slice(0, 3);
+  const shownProducts = findMatches(query).slice(0, 3);
 
   let heading = headingText[status];
   if (typing && status === "idle") heading = "Type what you are looking for";
@@ -67,6 +130,10 @@ export default function SearchScreen() {
         <View className="flex-row items-end px-6 mt-12" style={{ zIndex: 0 }}>
           <View className="flex-1 items-center mb-24">
             <Text className="text-[26px] font-bold text-center text-[#173F27]">{heading}</Text>
+            {/* what it heard */}
+            {status === "results" && (
+              <Text className="text-[18px] text-center text-[#173F27] mt-2">You said: “{query}”</Text>
+            )}
           </View>
           <Image
             source={require("../../assets/images/mascot.png")}
@@ -140,7 +207,8 @@ export default function SearchScreen() {
     );
   }
 
- 
+  const isError = status === "notHeard" || status === "noResults";
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -149,7 +217,7 @@ export default function SearchScreen() {
       <View className="flex-1 px-6" style={{ paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }}>
         {/* Back */}
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
           className="self-start flex-row items-center h-[44px] px-3 rounded-full gap-1 bg-white"
         >
           <Ionicons name="chevron-back" size={20} color="#173F27" />
@@ -159,6 +227,10 @@ export default function SearchScreen() {
         {/* Heading*/}
         <View className="h-[76px] justify-center mt-10">
           <Text className="text-[28px] font-bold text-center text-[#173F27]">{heading}</Text>
+          {/* no results: show what it heard */}
+          {status === "noResults" && (
+            <Text className="text-[18px] text-center text-[#173F27] mt-1">You said: “{query}”</Text>
+          )}
         </View>
 
         {/* Mascot */}
@@ -184,7 +256,7 @@ export default function SearchScreen() {
               onSubmitEditing={handleTypedSearch}
               autoCapitalize="none"
               autoCorrect={false}
-              className="w-full h-[56px] text-[18px] bg-white border-2 border-[#2F7A3A] rounded-full px-5"
+              className="w-full h-[56px] text-[18px] text-[#173F27] bg-white border-2 border-[#2F7A3A] rounded-full px-5"
             />
             <Pressable
               onPress={handleTypedSearch}
@@ -214,11 +286,11 @@ export default function SearchScreen() {
             </Pressable>
 
             <Text className="text-[26px] font-bold text-[#173F27] mt-5">
-              {status === "listening" ? "Tap when done" : "Tap to speak"}
+              {status === "listening" ? "Tap when done" : isError ? "Tap to try again" : "Tap to speak"}
             </Text>
 
             <Pressable
-              onPress={() => (status === "listening" ? setStatus("idle") : setTyping(true))}
+              onPress={() => (status === "listening" ? cancelListening() : setTyping(true))}
               className="mt-1 py-2"
             >
               <Text className="text-[18px] font-bold underline text-[#173F27]">
