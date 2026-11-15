@@ -11,6 +11,7 @@ export type SavedTip = {
   name: string;
   type: string;
   steps?: string;
+  audioUri?: string; // where the recording is saved on the phone
 };
 
 export const allTips: Tip[] = [

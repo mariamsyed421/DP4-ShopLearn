@@ -1,8 +1,10 @@
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { moneyToWords, readbackIsOn, speak, stopSpeaking } from "../api/voice";
 import { products } from "../data/products";
 
 export default function OrderPlacedScreen() {
@@ -34,12 +36,44 @@ export default function OrderPlacedScreen() {
   const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const deliveryDay = tomorrow.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
+  // The sentences the mascot reads out loud. Each one is read with a short break after it.
+  function makeReadout() {
+    return [
+      "Your order is on its way!",
+      `It arrives tomorrow, ${deliveryDay}, between 2 and 4 in the afternoon.`,
+      `Your total was ${moneyToWords(total)}.`,
+    ];
+  }
+
+  // Read it out loud once the order has loaded, and stop talking when we leave the page
+  // (only if "Spoken order read back" is turned on in Preferences)
+  useEffect(() => {
+    async function readItOutLoud() {
+      const isOn = await readbackIsOn();
+      if (isOn && items.length > 0) {
+        speak(makeReadout());
+      }
+    }
+    readItOutLoud();
+    return () => stopSpeaking();
+  }, [cartIds]);
+
   return (
     <View className="flex-1 bg-white">
       {/* Heading + mascot at the top */}
       <View className="flex-row items-center px-6" style={{ paddingTop: insets.top + 16, paddingBottom: 12 }}>
         <View className="flex-1 mr-2">
           <Text className="text-[30px] font-bold text-center text-[#173F27]">Your order is on its way!</Text>
+
+          {/* Button to hear it again */}
+          <Pressable
+            onPress={() => speak(makeReadout())}
+            accessibilityLabel="Hear the message again"
+            className="self-center flex-row items-center gap-2 h-[44px] px-4 rounded-full bg-[#DCEFD8] mt-2"
+          >
+            <Ionicons name="volume-high" size={22} color="#173F27" />
+            <Text className="text-[18px] font-bold text-[#173F27]">Hear it again</Text>
+          </Pressable>
         </View>
         <Image
           source={require("../../assets/images/mascot-thumbsup.png")}

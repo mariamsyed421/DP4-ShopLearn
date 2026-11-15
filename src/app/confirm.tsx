@@ -1,8 +1,10 @@
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { moneyToWords, readbackIsOn, speak, stopSpeaking } from "../api/voice";
 import { defaultPayment, Payment } from "../data/payment";
 import { products } from "../data/products";
 
@@ -31,6 +33,38 @@ export default function ConfirmScreen() {
   const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const itemCount = cartIds.length;
   const lastFour = payment.cardNumber.replace(/\s/g, "").slice(-4);
+
+  // The sentences the mascot reads out loud. Each one is read with a short break after it.
+  function makeReadout() {
+    const sentences = [];
+
+    if (items.length === 1) {
+      const item = items[0];
+      sentences.push(`You are ordering ${item.quantity} ${item.quantity === 1 ? "box" : "boxes"} of ${item.product.name}.`);
+    } else {
+      // read each item with how many of it, like "2 Cheerios, 1 Rice Chex"
+      const names = items.map((item) => `${item.quantity} ${item.product.name}`);
+      sentences.push(`You are ordering ${itemCount} items.`);
+      sentences.push(`That is ${names.join(", ")}.`);
+    }
+
+    sentences.push(`The total is ${moneyToWords(total)}.`);
+    sentences.push("Is that correct?");
+    return sentences;
+  }
+
+  // Read the order out loud once it has loaded, and stop talking when we leave the page
+  // (only if "Spoken order read back" is turned on in Preferences)
+  useEffect(() => {
+    async function readItOutLoud() {
+      const isOn = await readbackIsOn();
+      if (isOn && items.length > 0) {
+        speak(makeReadout());
+      }
+    }
+    readItOutLoud();
+    return () => stopSpeaking();
+  }, [cartIds]);
 
   async function handlePlaceOrder() {
     if (items.length === 0) return;
@@ -63,6 +97,18 @@ export default function ConfirmScreen() {
               )}{" "}
               for <Text className="font-bold">${total.toFixed(2)}</Text>. Is that correct?
             </Text>
+          )}
+
+          {/* Button to hear the order again */}
+          {items.length > 0 && (
+            <Pressable
+              onPress={() => speak(makeReadout())}
+              accessibilityLabel="Hear the order again"
+              className="self-center flex-row items-center gap-2 h-[44px] px-4 rounded-full bg-[#DCEFD8] mt-2"
+            >
+              <Ionicons name="volume-high" size={22} color="#173F27" />
+              <Text className="text-[18px] font-bold text-[#173F27]">Hear it again</Text>
+            </Pressable>
           )}
         </View>
         <Image

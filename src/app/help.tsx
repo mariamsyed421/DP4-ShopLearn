@@ -77,7 +77,7 @@ export default function HelpScreen() {
   const insets = useSafeAreaInsets();
   const { from } = useLocalSearchParams<{ from: string }>();
   const [isListening, setIsListening] = useState(false);
-  const [tips, setTips] = useState<{ id: string; name: string; steps?: string; type?: string }[]>([]);
+  const [tips, setTips] = useState<{ id: string; name: string; steps?: string; type?: string; audioUri?: string }[]>([]);
   const [openTipId, setOpenTipId] = useState("");
   const [answered, setAnswered] = useState(false);
   const [playingId, setPlayingId] = useState(""); // which tip is playing
@@ -185,7 +185,7 @@ export default function HelpScreen() {
 
     if (bestId !== "") {
       const tip = tips.find((t) => t.id === bestId);
-      if (tip && tipAudio[bestId]) {
+      if (tip && (tipAudio[bestId] || tip.audioUri)) {
         setHelpMessage(`Here is the tip for: ${tip.name}`);
       } else if (tip) {
         setHelpMessage("A tip is not recorded for that yet, but the answer is:");
@@ -236,8 +236,11 @@ export default function HelpScreen() {
       return;
     }
     setOpenTipId(id);
-    if (tipAudio[id]) {
-      player.replace(tipAudio[id]);
+    // a tip someone recorded themselves, or one of the built in clips
+    const tip = tips.find((t) => t.id === id);
+    const clip = tip?.audioUri || tipAudio[id];
+    if (clip) {
+      player.replace(clip);
       player.seekTo(0);
       player.play();
       setPlayingId(id);
@@ -302,7 +305,7 @@ export default function HelpScreen() {
             {openTipId === tip.id && (
               <View className="bg-white border-2 border-[#8BC585] rounded-2xl px-5 py-4 mt-2">
                 {/* play button */}
-                {tipAudio[tip.id] && (
+                {(tip.audioUri || tipAudio[tip.id]) && (
                   <Pressable
                     onPress={() => playTip(tip.id)}
                     className="flex-row items-center self-start gap-2 mb-3"
@@ -318,7 +321,7 @@ export default function HelpScreen() {
                   </Pressable>
                 )}
                 <Text className="text-[18px] text-[#173F27] leading-[28px]">
-                  {tip.steps ? tip.steps : "This tip does not have a recording yet."}
+                  {tip.steps ? tip.steps : tip.audioUri ? "Tap play to hear this tip." : "This tip does not have a recording yet."}
                 </Text>
               </View>
             )}
