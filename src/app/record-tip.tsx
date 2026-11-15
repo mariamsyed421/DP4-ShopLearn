@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus, useAudioRecorder } from 'expo-audio';
+import * as FileSystem from "expo-file-system/legacy";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
@@ -17,6 +18,7 @@ export default function RecordTipScreen() {
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
   const [recordedUri, setRecordedUri] = useState(""); // the recording we just made
+  const [savedUri, setSavedUri] = useState(""); // the recording already saved with this tip
 
   const perms = async () => {
     const permRes = await requestRecordingPermissionsAsync();
@@ -38,7 +40,7 @@ export default function RecordTipScreen() {
     }
     // makes sure the sound comes out loud
     await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
-    player.replace(recordedUri);
+    player.replace(recordedUri || savedUri);
     player.seekTo(0);
     player.play();
   }
@@ -63,6 +65,7 @@ export default function RecordTipScreen() {
       const tip = tips.find((t) => t.id === tipId);
       if (tip) {
         setName(tip.name);
+        setSavedUri(tip.audioUri || "");
         setStatus("done");
       }
     }
@@ -112,15 +115,30 @@ export default function RecordTipScreen() {
     }
 
     const tips = await loadTips();
+    const newId = tipId || Date.now().toString();
+
+    // The recording starts in a temporary spot, so copy it somewhere permanent
+    let audioUri = savedUri;
+    if (recordedUri !== "") {
+      try {
+        const keepPath = FileSystem.documentDirectory + "tip-" + newId + "-" + Date.now() + ".m4a";
+        await FileSystem.copyAsync({ from: recordedUri, to: keepPath });
+        audioUri = keepPath;
+      } catch (e) {
+        setError("Sorry, we could not save the recording. Please try again.");
+        return;
+      }
+    }
 
     if (tipId) {
-      const updated = tips.map((t) => (t.id === tipId ? { ...t, name: name.trim() } : t));
+      const updated = tips.map((t) => (t.id === tipId ? { ...t, name: name.trim(), audioUri } : t));
       await saveTips(updated);
     } else {
       tips.push({
-        id: Date.now().toString(),
+        id: newId,
         name: name.trim(),
         type: isVideo ? "video" : "audio",
+        audioUri,
       });
       await saveTips(tips);
     }
@@ -263,7 +281,7 @@ export default function RecordTipScreen() {
               </Text>
             )}
             {/* Play back the recording */}
-            {status === "done" && recordedUri !== "" && (
+            {status === "done" && (recordedUri !== "" || savedUri !== "") && (
               <Pressable
                 onPress={playBack}
                 style={{
